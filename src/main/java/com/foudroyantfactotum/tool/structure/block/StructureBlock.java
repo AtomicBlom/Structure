@@ -201,9 +201,9 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
 
     @Override
     @Deprecated
-    public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn)
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos neighbourPos)
     {
-        onSharedNeighbourBlockChange(world, pos, regHash, blockIn, state);
+        onSharedNeighbourBlockChange(worldIn, pos, regHash, blockIn, state);
     }
 
     @Override
@@ -241,9 +241,9 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
     }
 
     @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        return onStructureBlockActivated(world, pos, player, hand, pos, side, BlockPos.ORIGIN, hitX, hitY, hitZ);
+        return onStructureBlockActivated(worldIn, pos, playerIn, hand, pos, side, BlockPos.ORIGIN, hitX, hitY, hitZ);
     }
 
     @Override
@@ -491,7 +491,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
                             sd.getBlockBounds()
                     );
 
-                    world.notifyNeighborsOfStateChange(mutLocal, updatedBlock.getBlock());
+                    world.notifyNeighborsOfStateChange(mutLocal, updatedBlock.getBlock(), true);
                 }
             }
         }

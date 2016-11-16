@@ -26,6 +26,24 @@ import net.minecraft.util.text.TextComponentString;
 public interface IStructureShapeSidedInventory<E extends IStructureSidedInventory> extends ISidedInventory, IStructureShapeTE<E>
 {
     @Override
+    default boolean func_191420_l()
+    {
+        if (!hasOriginTE()) {
+            return true;
+        }
+
+        final int inventorySize = getOriginTE().getSizeInventory();
+
+        for (int i = 0; i < inventorySize; ++i) {
+            if (!getOriginTE().getStackInSlot(i).func_190926_b()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
     default int[] getSlotsForFace(EnumFacing side)
     {
         return hasOriginTE() ?

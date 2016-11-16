@@ -268,9 +268,9 @@ public abstract class StructureShapeBlock extends Block implements ITileEntityPr
     }
 
     @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        final StructureShapeTE te = (StructureShapeTE) world.getTileEntity(pos);
+        final StructureShapeTE te = (StructureShapeTE) worldIn.getTileEntity(pos);
 
         if (te != null)
         {
@@ -278,18 +278,18 @@ public abstract class StructureShapeBlock extends Block implements ITileEntityPr
 
             if (block != null)
             {
-                return block.onStructureBlockActivated(world, te.getMasterBlockLocation(), player, hand, pos, side, te.getLocal(), hitX, hitY, hitZ);
+                return block.onStructureBlockActivated(worldIn, te.getMasterBlockLocation(), playerIn, hand, pos, side, te.getLocal(), hitX, hitY, hitZ);
             }
         }
 
-        world.setBlockToAir(pos);
+        worldIn.setBlockToAir(pos);
 
         return false;
     }
 
     @Override
     @Deprecated
-    public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn)
+    public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos neighbourPos)
     {
         onSharedNeighbourBlockChange(world, pos,
                 ((StructureShapeTE) world.getTileEntity(pos)).getRegHash(),

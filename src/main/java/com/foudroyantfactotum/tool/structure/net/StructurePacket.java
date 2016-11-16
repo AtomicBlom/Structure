@@ -91,7 +91,7 @@ public class StructurePacket implements IMessage
         @Override
         public IMessage onMessage(StructurePacket msg, MessageContext ctx)
         {
-            final World world = Minecraft.getMinecraft().theWorld;
+            final World world = Minecraft.getMinecraft().world;
             final StructureBlock block = StructureRegistry.getStructureBlock(msg.structureHash);
 
             if (block == null)
