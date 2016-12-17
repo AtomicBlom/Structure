@@ -21,7 +21,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTankInfo;
-import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 public interface IStructureFluidHandler extends IFluidHandler, IStructureTE
 {
@@ -31,8 +31,8 @@ public interface IStructureFluidHandler extends IFluidHandler, IStructureTE
     boolean canStructureDrain(EnumFacing from, Fluid fluid, BlockPos local);
 
     int structureFill(EnumFacing from, FluidStack resource, boolean doFill, BlockPos local);
-    FluidStack structureDrain(EnumFacing from, FluidStack resource, boolean doDrain, BlockPos local);
-    FluidStack structureDrain(EnumFacing from, int maxDrain, boolean doDrain, BlockPos local);
+    FluidStack structureDrain(FluidStack resource, boolean doDrain, BlockPos local);
+    FluidStack structureDrain(int maxDrain, boolean doDrain, BlockPos local);
 
     FluidTankInfo[] getStructureTankInfo(EnumFacing from, BlockPos local);
 

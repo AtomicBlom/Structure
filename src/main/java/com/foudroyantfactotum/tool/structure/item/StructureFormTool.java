@@ -67,7 +67,7 @@ public class StructureFormTool extends Item
             return EnumActionResult.SUCCESS;
         }
 
-        final EnumFacing[] orientation = orientationPriority[MathHelper.floor_double(playerIn.rotationYaw * 4.0f / 360.0f + 0.5) & 3];
+        final EnumFacing[] orientation = orientationPriority[MathHelper.floor(playerIn.rotationYaw * 4.0f / 360.0f + 0.5) & 3];
         final boolean[] mirror = mirrorPriority[playerIn.isSneaking()?1:0];
 
         doSearch(worldIn, pos, orientation, mirror, StructureRegistry.getStructureList());

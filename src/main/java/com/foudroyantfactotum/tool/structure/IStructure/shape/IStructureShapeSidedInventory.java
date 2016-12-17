@@ -25,7 +25,7 @@ import net.minecraft.util.text.TextComponentString;
 
 public interface IStructureShapeSidedInventory<E extends IStructureSidedInventory> extends ISidedInventory, IStructureShapeTE<E>
 {
-    @Override
+    /*@Override
     default boolean func_191420_l()
     {
         if (!hasOriginTE()) {
@@ -41,7 +41,7 @@ public interface IStructureShapeSidedInventory<E extends IStructureSidedInventor
         }
 
         return true;
-    }
+    }*/
 
     @Override
     default int[] getSlotsForFace(EnumFacing side)
@@ -153,9 +153,9 @@ public interface IStructureShapeSidedInventory<E extends IStructureSidedInventor
     }
 
     @Override
-    default boolean isUseableByPlayer(EntityPlayer player)
+    default boolean isUsableByPlayer(EntityPlayer player)
     {
-        return hasOriginTE() && getOriginTE().isUseableByPlayer(player);
+        return hasOriginTE() && getOriginTE().isUsableByPlayer(player);
     }
 
     @Override

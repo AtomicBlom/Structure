@@ -17,6 +17,7 @@ package com.foudroyantfactotum.tool.structure;
 
 import com.foudroyantfactotum.tool.structure.block.StructureBlock;
 import com.foudroyantfactotum.tool.structure.block.StructureShapeBlock;
+import com.foudroyantfactotum.tool.structure.coordinates.TransformLAG;
 import com.foudroyantfactotum.tool.structure.utility.StructureDefinitionBuilder.StructureDefinitionError;
 import com.google.common.collect.Lists;
 import com.mojang.realmsclient.util.Pair;
@@ -50,6 +51,7 @@ public final class StructureRegistry
         if (MOD_ID == null)
         {
             MOD_ID = modId;
+            TransformLAG.initStatic();
         }
     }
 
@@ -123,19 +125,19 @@ public final class StructureRegistry
         private static final List<String> aliases = Lists.newArrayList(COMMAND);
 
         @Override
-        public String getCommandName()
+        public String getName()
         {
             return COMMAND;
         }
 
         @Override
-        public String getCommandUsage(ICommandSender player)
+        public String getUsage(ICommandSender player)
         {
             return COMMAND;
         }
 
         @Override
-        public List<String> getCommandAliases()
+        public List<String> getAliases()
         {
             return aliases;
         }
@@ -144,7 +146,7 @@ public final class StructureRegistry
         public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
         {
             loadRegisteredPatterns();
-            sender.addChatMessage(new TextComponentString("Reconstructed " + structures.size() + " structures"));
+            sender.sendMessage(new TextComponentString("Reconstructed " + structures.size() + " structures"));
         }
 
         //restrict usage of development function
@@ -162,7 +164,7 @@ public final class StructureRegistry
         }
 
         @Override
-        public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos pos)
+        public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos pos)
         {
             return null;
         }

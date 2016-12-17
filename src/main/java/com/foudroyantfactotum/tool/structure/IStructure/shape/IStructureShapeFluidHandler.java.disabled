@@ -20,7 +20,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTankInfo;
-import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 public interface IStructureShapeFluidHandler<E extends IStructureFluidHandler> extends IFluidHandler, IStructureShapeTE<E>
 {
@@ -38,22 +38,22 @@ public interface IStructureShapeFluidHandler<E extends IStructureFluidHandler> e
     }
 
     @Override
-    default FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain)
+    default FluidStack drain(FluidStack resource, boolean doDrain)
     {
         if (hasOriginTE())
         {
-            return getOriginTE().structureDrain(from, resource, doDrain, getLocal());
+            return getOriginTE().structureDrain(resource, doDrain, getLocal());
         }
 
         return null;
     }
 
     @Override
-    default FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain)
+    default FluidStack drain(int maxDrain, boolean doDrain)
     {
         if (hasOriginTE())
         {
-            return getOriginTE().structureDrain(from, maxDrain, doDrain, getLocal());
+            return getOriginTE().structureDrain(maxDrain, doDrain, getLocal());
         }
 
         return null;
