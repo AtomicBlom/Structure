@@ -244,12 +244,13 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
 
         if (sb != null)
         {
+            boolean shouldDecompose = sb.shouldDecompose() && (!isPlayerCreative || isPlayerSneaking);
+
             sb.breakStructure(world,
                     te.getMasterBlockLocation(),
                     state.getValue(BlockHorizontal.FACING),
                     getMirror(state),
-                    isPlayerCreative,
-                    isPlayerSneaking
+                    shouldDecompose
             );
             updateExternalNeighbours(world,
                     te.getMasterBlockLocation(),

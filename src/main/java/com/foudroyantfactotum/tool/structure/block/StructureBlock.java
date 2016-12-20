@@ -215,13 +215,18 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
 
         if (te != null)
         {
-            breakStructure(world, pos, te.getOrientation(), te.getMirror(), isPlayerCreative, isPlayerSneaking);
+            boolean decompose = shouldDecompose() && (!isPlayerCreative || isPlayerSneaking);
+            breakStructure(world, pos, te.getOrientation(), te.getMirror(), decompose);
             updateExternalNeighbours(world, pos, getPattern(), te.getOrientation(), te.getMirror(), false);
         } else
         {
             world.setBlockToAir(pos);
         }
 
+        return true;
+    }
+
+    protected boolean shouldDecompose() {
         return true;
     }
 
@@ -450,7 +455,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
         }
     }
 
-    public void breakStructure(World world, BlockPos origin, EnumFacing orientation, boolean mirror, boolean isCreative, boolean isSneaking)
+    public void breakStructure(World world, BlockPos origin, EnumFacing orientation, boolean mirror, boolean decompose)
     {
         for (final MutableBlockPos local : getPattern().getStructureItr())
         {
@@ -464,7 +469,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
                 {
                     world.removeTileEntity(local);
 
-                    world.setBlockState(new BlockPos(local), (isCreative && !isSneaking) ?
+                    world.setBlockState(new BlockPos(local), !decompose ?
                             Blocks.AIR.getDefaultState() :
                             localToGlobal(block, orientation, mirror)
                             , 0x2);
