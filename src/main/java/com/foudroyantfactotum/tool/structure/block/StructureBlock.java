@@ -304,6 +304,12 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
         return world.getTileEntity(pos).getRenderBoundingBox();
     }
 
+    @Override
+    public boolean hasTileEntity(IBlockState state)
+    {
+        return true;
+    }
+
 
     //=======================================================
     //       S t r u c t u r e   B l o c k   C o d e
@@ -411,14 +417,15 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
             shapeState = shapeState.withProperty(MIRROR, mirror);
         }
 
-        for (final MutableBlockPos local : getPattern().getStructureItr())
+        final StructureDefinition pattern = getPattern();
+        for (final MutableBlockPos local : pattern.getStructureItr())
         {
-            if (!getPattern().hasBlockAt(local))
+            if (!pattern.hasBlockAt(local))
             {
                 continue;
             }
 
-            final BlockPos blockCoord = bindLocalToGlobal(origin, local, orientation, mirror, getPattern().getBlockBounds());
+            final BlockPos blockCoord = bindLocalToGlobal(origin, local, orientation, mirror, pattern.getBlockBounds());
 
             world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL,
                     blockCoord.getX() + 0.5f,

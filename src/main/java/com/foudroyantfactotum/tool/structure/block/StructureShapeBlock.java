@@ -50,7 +50,7 @@ import java.util.Random;
 import static com.foudroyantfactotum.tool.structure.block.StructureBlock.*;
 import static com.foudroyantfactotum.tool.structure.coordinates.TransformLAG.localToGlobalCollisionBoxes;
 
-public abstract class StructureShapeBlock extends Block implements ITileEntityProvider, ICanMirror
+public class StructureShapeBlock extends Block implements ITileEntityProvider, ICanMirror
 {
     public static boolean _DEBUG = false;
     public static final String NAME = "structureShape";

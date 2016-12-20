@@ -40,7 +40,7 @@ import javax.annotation.Nullable;
 import static com.foudroyantfactotum.tool.structure.coordinates.TransformLAG.flagEnumFacing;
 import static com.foudroyantfactotum.tool.structure.coordinates.TransformLAG.localToGlobalBoundingBox;
 
-public abstract class StructureTE extends TileEntity implements IStructureTE
+public class StructureTE extends TileEntity implements IStructureTE
 {
     static final String BLOCK_INFO = "blockINFO";
     static final String BLOCK_PATTERN_NAME = "blockPatternHash";
