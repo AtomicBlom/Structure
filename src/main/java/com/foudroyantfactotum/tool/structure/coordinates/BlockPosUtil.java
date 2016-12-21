@@ -33,18 +33,18 @@ public final class BlockPosUtil
     public static int toInt(BlockPos pos) { return toInt(pos.getX(), pos.getY(), pos.getZ()); }
     public static int toInt(int x, int y, int z)
     {
-        return  (((byte) x) << 16) +
-                (((byte) y) << 8)  +
-                 ((byte) z);
+        final int xBits = ((byte) x & 255) << 16;
+        final int yBits = ((byte) y & 255) << 8;
+        final int zBits = (byte) z & 255;
+        return xBits | yBits | zBits;
     }
 
     public static BlockPos fromInt(int val)
     {
-        return new BlockPos(
-                (byte) (val >> 16),
-                (byte) (val >> 8),
-                (byte)  val
-        );
+        final byte x = (byte) ((val >> 16) & 255);
+        final byte y = (byte) ((val >> 8) & 255);
+        final byte z = (byte) (val & 255);
+        return new BlockPos(x, y, z);
     }
 
     public static void mutSetX(MutableBlockPos pos, int x)
