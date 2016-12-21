@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.vertex.*;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -35,7 +34,7 @@ import org.lwjgl.opengl.GL11;
 import java.util.List;
 
 public class HighlightPreview {
-    private static EnumFacing[] modelSources = {
+    private static final EnumFacing[] modelSources = {
             EnumFacing.UP,
             EnumFacing.DOWN,
             EnumFacing.NORTH,
@@ -54,6 +53,9 @@ public class HighlightPreview {
         EntityPlayer player = event.getPlayer();
         ItemStack heldItem = player.getHeldItem(EnumHand.MAIN_HAND);
         Item item = heldItem.getItem();
+        if (heldItem.isEmpty()) {
+            return;
+        }
         if (!(item instanceof ItemBlock)) {
             return;
         }
@@ -63,7 +65,14 @@ public class HighlightPreview {
         }
         StructureBlock structureBlock = (StructureBlock)block;
 
+        highlightFutureBlock(event, structureBlock);
+    }
+
+    private void highlightFutureBlock(DrawBlockHighlightEvent event, StructureBlock structureBlock) {
+        RayTraceResult target = event.getTarget();
+        EntityPlayer player = event.getPlayer();
         BlockPos blockPos = target.getBlockPos();
+        ItemStack heldItem = player.getHeldItem(EnumHand.MAIN_HAND);
         BlockPos potentialPlaceLocation = blockPos.offset(target.sideHit);
 
         final BlockPos blockpos = potentialPlaceLocation;
@@ -88,7 +97,7 @@ public class HighlightPreview {
             double y = player.lastTickPosY + (player.posY - player.lastTickPosY) * (double)partialTicks;
             double z = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * (double)partialTicks;
 
-            renderBadBlockoutline(badLocations, x, y, z);
+            renderBadBlockOutline(badLocations, x, y, z);
 
             renderPlacement(structureBlock, blockpos, world, partialTicks, canPlace, blockState, x, y, z);
         }
@@ -115,7 +124,7 @@ public class HighlightPreview {
         GlStateManager.popMatrix();
     }
 
-    private void renderBadBlockoutline(List<BlockPos.MutableBlockPos> badLocations, double x, double y, double z) {
+    private void renderBadBlockOutline(List<BlockPos.MutableBlockPos> badLocations, double x, double y, double z) {
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.glLineWidth(2.0F);
