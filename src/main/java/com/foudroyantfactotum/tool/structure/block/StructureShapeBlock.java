@@ -18,6 +18,7 @@ package com.foudroyantfactotum.tool.structure.block;
 import com.foudroyantfactotum.tool.structure.IStructure.ICanMirror;
 import com.foudroyantfactotum.tool.structure.IStructure.IStructureTE;
 import com.foudroyantfactotum.tool.structure.StructureRegistry;
+import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
 import com.foudroyantfactotum.tool.structure.tileentity.StructureShapeTE;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
@@ -181,15 +182,18 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
             final BlockPos mloc = te.getMasterBlockLocation();
             final StructureBlock sb = StructureRegistry.getStructureBlock(te.getRegHash());
 
-            if (sb == null || sb.getPattern().getCollisionBoxes() == null)
+            StructureDefinition pattern = sb.getPattern();
+            float[][] collisionBoxes = pattern.getCollisionBoxes();
+            if (sb == null || collisionBoxes == null)
             {
                 return;
             }
 
-            localToGlobalCollisionBoxes(mloc.getX(), mloc.getY(), mloc.getZ(),
-                    mask, list, sb.getPattern().getCollisionBoxes(),
-                    state.getValue(BlockHorizontal.FACING), getMirror(state),
-                    sb.getPattern().getBlockBounds()
+            localToGlobalCollisionBoxes(
+                    pos,
+                    mloc.getX() - pos.getX(), mloc.getY() - pos.getY(), mloc.getZ() - pos.getZ(),
+                    mask, list, collisionBoxes,
+                    state.getValue(BlockHorizontal.FACING), getMirror(state)
             );
         }
     }

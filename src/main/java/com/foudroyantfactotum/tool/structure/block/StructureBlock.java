@@ -66,9 +66,8 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
     private StructureDefinition structureDefinition = null;
     private final boolean canMirror;
 
-    public StructureBlock(boolean canMirror)
-    {
-        super(Material.PISTON);
+    public StructureBlock(Material material, boolean canMirror) {
+        super(material);
         this.canMirror = canMirror;
         setSoundType(SoundType.STONE);
         setHardness(0.5f);
@@ -83,6 +82,11 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
         }
 
         setDefaultState(defaultState);
+    }
+
+    public StructureBlock(boolean canMirror)
+    {
+        this(Material.PISTON, canMirror);
     }
 
     public void setStructureDefinition(StructureDefinition d, StructureShapeBlock b, int h)
@@ -234,13 +238,15 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
     @Deprecated
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity entityIn)
     {
-        if (getPattern().getCollisionBoxes() != null)
+        StructureDefinition pattern = getPattern();
+        float[][] collisionBoxes = pattern.getCollisionBoxes();
+        if (collisionBoxes != null)
         {
             localToGlobalCollisionBoxes(
-                    pos.getX(), pos.getY(), pos.getZ(),
-                    mask, list, getPattern().getCollisionBoxes(),
-                    state.getValue(BlockHorizontal.FACING), getMirror(state),
-                    getPattern().getBlockBounds()
+                    pos,
+                    0, 0, 0,
+                    mask, list, collisionBoxes,
+                    state.getValue(BlockHorizontal.FACING), getMirror(state)
             );
         }
     }

@@ -278,10 +278,15 @@ public final class TransformLAG
 
     //collision boxes
     public static void localToGlobalCollisionBoxes(
-            int x, int y, int z,
+            BlockPos pos,
+            int offsetX, int offsetY, int offsetZ,
             AxisAlignedBB aabb, List<AxisAlignedBB> boundingBoxList, float[][] collB,
-            EnumFacing orientation, boolean mirror, BlockPos size)
+            EnumFacing orientation, boolean mirror)
     {
+        int x = pos.getX();
+        int y = pos.getY();
+        int z = pos.getZ();
+
         final int[][] matrix = rotationMatrix[orientation.ordinal()-2];
 
         final int ntx = orientation == EnumFacing.SOUTH || orientation == EnumFacing.WEST? -1:0;
@@ -318,13 +323,13 @@ public final class TransformLAG
             }
 
 
-            bb.minX = x + min(c1x, c2x) + tx;
-            bb.minY = y + f[1];
-            bb.minZ = z + min(c1z, c2z) + tz;
+            bb.minX = x + min(c1x, c2x) + tx + offsetX;
+            bb.minY = y + f[1] + offsetY;
+            bb.minZ = z + min(c1z, c2z) + tz + offsetZ;
 
-            bb.maxX = x + max(c1x, c2x) + tx;
-            bb.maxY = y + f[4];
-            bb.maxZ = z + max(c1z, c2z) + tz;
+            bb.maxX = x + max(c1x, c2x) + tx + offsetX;
+            bb.maxY = y + f[4] + offsetY;
+            bb.maxZ = z + max(c1z, c2z) + tz + offsetZ;
 
             if (bb.intersectsWith(aabb))
             {
