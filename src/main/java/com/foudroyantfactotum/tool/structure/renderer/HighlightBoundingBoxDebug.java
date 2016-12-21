@@ -18,8 +18,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import java.util.List;
 
 public class HighlightBoundingBoxDebug {
+    //Double.MIN_VALUE is not what you think it is: http://stackoverflow.com/a/3884879
     private static final AxisAlignedBB allEncompassingAxisAlignedBoundingBox = new AxisAlignedBB(
-            Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE,
+            -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE,
             Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 
     @SubscribeEvent
@@ -58,6 +59,10 @@ public class HighlightBoundingBoxDebug {
                 allEncompassingAxisAlignedBoundingBox,
                 collisionBoxes,
                 player);
+
+        if (collisionBoxes.size() == 0) {
+            return;
+        }
 
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
