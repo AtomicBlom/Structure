@@ -73,12 +73,15 @@ public class HighlightPreview {
         EntityPlayer player = event.getPlayer();
         BlockPos blockPos = target.getBlockPos();
         ItemStack heldItem = player.getHeldItem(EnumHand.MAIN_HAND);
-        BlockPos potentialPlaceLocation = blockPos.offset(target.sideHit);
-
-        final BlockPos blockpos = potentialPlaceLocation;
         World world = player.world;
+
+        BlockPos potentialPlaceLocation = blockPos;
+        if (!world.getBlockState(blockPos).getBlock().isReplaceable(world, blockPos)) {
+            potentialPlaceLocation = blockPos.offset(target.sideHit);
+        }
+
         float partialTicks = event.getPartialTicks();
-        if (world.getWorldBorder().contains(blockpos))
+        if (world.getWorldBorder().contains(potentialPlaceLocation))
         {
             List<BlockPos.MutableBlockPos> badLocations = Lists.newArrayList();
 
@@ -99,7 +102,7 @@ public class HighlightPreview {
 
             renderBadBlockOutline(badLocations, x, y, z);
 
-            renderPlacement(structureBlock, blockpos, world, partialTicks, canPlace, blockState, x, y, z);
+            renderPlacement(structureBlock, potentialPlaceLocation, world, partialTicks, canPlace, blockState, x, y, z);
         }
     }
 
