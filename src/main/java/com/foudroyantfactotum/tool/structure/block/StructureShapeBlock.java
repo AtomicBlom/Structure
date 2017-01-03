@@ -20,10 +20,7 @@ import com.foudroyantfactotum.tool.structure.IStructure.IStructureTE;
 import com.foudroyantfactotum.tool.structure.StructureRegistry;
 import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
 import com.foudroyantfactotum.tool.structure.tileentity.StructureShapeTE;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockHorizontal;
-import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.block.SoundType;
+import net.minecraft.block.*;
 import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
@@ -45,8 +42,10 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 
 import static com.foudroyantfactotum.tool.structure.block.StructureBlock.*;
 import static com.foudroyantfactotum.tool.structure.coordinates.TransformLAG.localToGlobalCollisionBoxes;
@@ -150,6 +149,46 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
     public boolean isSideSolid(IBlockState base_state, IBlockAccess world, BlockPos pos, EnumFacing side)
     {
         return false;
+    }
+
+    @Override
+    public boolean isBed(IBlockState state, IBlockAccess world, BlockPos pos, @Nullable Entity player)
+    {
+        final StructureShapeTE te = (StructureShapeTE) world.getTileEntity(pos);
+        if (te != null)
+        {
+            final BlockPos masterBlockLocation = te.getMasterBlockLocation();
+            final IBlockState blockState = world.getBlockState(masterBlockLocation);
+            return blockState.getBlock().isBed(blockState, world, masterBlockLocation, player);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isBedFoot(IBlockAccess world, BlockPos pos)
+    {
+        final StructureShapeTE te = (StructureShapeTE) world.getTileEntity(pos);
+        if (te != null)
+        {
+            final BlockPos masterBlockLocation = te.getMasterBlockLocation();
+            final IBlockState blockState = world.getBlockState(masterBlockLocation);
+            return blockState.getBlock().isBedFoot(world, masterBlockLocation);
+        }
+        return false;
+    }
+
+    public void setBedOccupied(IBlockAccess world, BlockPos pos, EntityPlayer player, boolean occupied)
+    {
+        if (world instanceof World)
+        {
+            final StructureShapeTE te = (StructureShapeTE) world.getTileEntity(pos);
+            if (te != null)
+            {
+                final BlockPos masterBlockLocation = te.getMasterBlockLocation();
+                final IBlockState blockState = world.getBlockState(masterBlockLocation);
+                blockState.getBlock().setBedOccupied(world, masterBlockLocation, player, occupied);
+            }
+        }
     }
 
     @Override
