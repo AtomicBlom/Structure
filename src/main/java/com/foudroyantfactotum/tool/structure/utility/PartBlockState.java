@@ -44,7 +44,7 @@ public class PartBlockState implements IPartBlockState
 
     public static PartBlockState of(IBlockState b, String s)
     {
-        final Collection<IProperty<?>> defaultProp = b.getPropertyKeys();
+        final Collection<IProperty<?>> defaultProp = b.getPropertyNames();
         final ImmutableMap.Builder<IProperty, Comparable> builderDef = ImmutableMap.builder();
         final Set<IProperty> properties = new HashSet<>(defaultProp);
 
@@ -85,7 +85,7 @@ public class PartBlockState implements IPartBlockState
                                         "' value missing: '" + propVal +
                                         "' in '" + prop.getAllowedValues() +
                                         "' on '" + b.getBlock().getUnlocalizedName() +
-                                        "' with property: '" + b.getPropertyKeys()
+                                        "' with property: '" + b.getPropertyNames()
                         );
                     }
 
@@ -100,7 +100,7 @@ public class PartBlockState implements IPartBlockState
                         "Missing property: '" + propName +
                                 "' value: '" + propVal +
                                 "' on block: '" + b.getBlock().getUnlocalizedName() +
-                                "' with property: '" + b.getPropertyKeys()
+                                "' with property: '" + b.getPropertyNames()
                 );
             }
         }
@@ -124,7 +124,7 @@ public class PartBlockState implements IPartBlockState
     {
         return new PartBlockState(
                 ImmutableMap.<IProperty, Comparable>of(),
-                ImmutableList.copyOf(b.getPropertyKeys()),
+                ImmutableList.copyOf(b.getPropertyNames()),
                 b
         );
     }

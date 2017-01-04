@@ -210,10 +210,10 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
         return EMPTY_BOUNDS;
     }
 
+
     @Override
     @Deprecated
-    public void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, @Nullable Entity entityIn, boolean p_185477_7_)
-    {
+    public void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, @Nullable Entity entityIn) {
         final IStructureTE te = (IStructureTE) world.getTileEntity(pos);
 
         if (te != null)
@@ -312,8 +312,7 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
-    {
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
         final StructureShapeTE te = (StructureShapeTE) worldIn.getTileEntity(pos);
 
         if (te != null)
@@ -331,10 +330,10 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
         return false;
     }
 
+
     @Override
     @Deprecated
-    public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos neighbourPos)
-    {
+    public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn) {
         onSharedNeighbourBlockChange(world, pos,
                 ((StructureShapeTE) world.getTileEntity(pos)).getRegHash(),
                 blockIn,

@@ -15,6 +15,8 @@ import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.vertex.*;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -52,10 +54,13 @@ public class HighlightPreview {
         }
         EntityPlayer player = event.getPlayer();
         ItemStack heldItem = player.getHeldItem(EnumHand.MAIN_HAND);
-        Item item = heldItem.getItem();
-        if (heldItem.isEmpty()) {
+
+        if (heldItem == null || heldItem.stackSize == 0) {
             return;
         }
+
+        Item item = heldItem.getItem();
+
         if (!(item instanceof ItemBlock)) {
             return;
         }
@@ -73,7 +78,7 @@ public class HighlightPreview {
         EntityPlayer player = event.getPlayer();
         BlockPos blockPos = target.getBlockPos();
         ItemStack heldItem = player.getHeldItem(EnumHand.MAIN_HAND);
-        World world = player.world;
+        World world = player.worldObj;
 
         BlockPos potentialPlaceLocation = blockPos;
         if (!world.getBlockState(blockPos).getBlock().isReplaceable(world, blockPos)) {
@@ -85,7 +90,7 @@ public class HighlightPreview {
         {
             List<BlockPos.MutableBlockPos> badLocations = Lists.newArrayList();
 
-            final EnumFacing orientation = EnumFacing.getHorizontal(MathHelper.floor(player.rotationYaw * 4.0f / 360.0f + 0.5) & 3);
+            final EnumFacing orientation = EnumFacing.getHorizontal(MathHelper.floor_double(player.rotationYaw * 4.0f / 360.0f + 0.5) & 3);
             final boolean mirror = structureBlock.canMirror() && player.isSneaking();
 
             boolean canPlace = StructureQuery.canPlaceStructure(structureBlock, world, potentialPlaceLocation, orientation, mirror, badLocations);

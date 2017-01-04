@@ -48,7 +48,7 @@ public class StructureBlockItem extends ItemBlock
             return false;
         }
 
-        final EnumFacing orientation = EnumFacing.getHorizontal(MathHelper.floor(player.rotationYaw * 4.0f / 360.0f + 0.5) & 3);
+        final EnumFacing orientation = EnumFacing.getHorizontal(MathHelper.floor_double(player.rotationYaw * 4.0f / 360.0f + 0.5) & 3);
         final boolean mirror = block.canMirror() && player.isSneaking();
 
         newState = newState.withProperty(BlockHorizontal.FACING, orientation);

@@ -206,8 +206,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
 
     @Override
     @Deprecated
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos neighbourPos)
-    {
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn) {
         onSharedNeighbourBlockChange(worldIn, pos, regHash, blockIn, state);
     }
 
@@ -237,7 +236,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
 
     @Override
     @Deprecated
-    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, @Nullable Entity entityIn, boolean p_185477_7_) {
+    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, @Nullable Entity entityIn) {
         StructureDefinition pattern = getPattern();
         float[][] collisionBoxes = pattern.getCollisionBoxes();
         if (collisionBoxes != null)
@@ -252,8 +251,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
-    {
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, @Nullable ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
         return onStructureBlockActivated(worldIn, pos, playerIn, hand, pos, side, BlockPos.ORIGIN, hitX, hitY, hitZ);
     }
 
@@ -509,7 +507,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
                             sd.getBlockBounds()
                     );
 
-                    world.notifyNeighborsOfStateChange(mutLocal, updatedBlock.getBlock(), true);
+                    world.notifyNeighborsOfStateChange(mutLocal, updatedBlock.getBlock());
                 }
             }
         }

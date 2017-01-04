@@ -31,7 +31,7 @@ public class HighlightBoundingBoxDebug {
         }
         EntityPlayer player = event.getPlayer();
         ItemStack heldItem = player.getHeldItem(EnumHand.MAIN_HAND);
-        if (!heldItem.isEmpty()) {
+        if (!(heldItem == null || heldItem.getItem() == null)) {
             return;
         }
 
@@ -46,7 +46,7 @@ public class HighlightBoundingBoxDebug {
     private void highlightBoundingBoxes(DrawBlockHighlightEvent event, IBlockState blockState) {
         RayTraceResult result = event.getTarget();
         EntityPlayer player = event.getPlayer();
-        World world = player.world;
+        World world = player.worldObj;
         float partialTicks = event.getPartialTicks();
         double x = event.getPlayer().lastTickPosX + (event.getPlayer().posX - event.getPlayer().lastTickPosX) * (double)partialTicks;
         double y = player.lastTickPosY + (player.posY - player.lastTickPosY) * (double)partialTicks;
@@ -58,8 +58,7 @@ public class HighlightBoundingBoxDebug {
                 result.getBlockPos(),
                 allEncompassingAxisAlignedBoundingBox,
                 collisionBoxes,
-                player,
-                false);
+                player);
 
         if (collisionBoxes.size() == 0) {
             return;

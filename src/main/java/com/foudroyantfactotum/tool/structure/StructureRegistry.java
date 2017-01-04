@@ -30,6 +30,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.ProgressManager;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 import static net.minecraftforge.fml.common.ProgressManager.ProgressBar;
@@ -125,19 +126,18 @@ public final class StructureRegistry
         private static final List<String> aliases = Lists.newArrayList(COMMAND);
 
         @Override
-        public String getName()
+        public String getCommandName() {
+            return COMMAND;
+        }
+
+        @Override
+        public String getCommandUsage(ICommandSender player)
         {
             return COMMAND;
         }
 
         @Override
-        public String getUsage(ICommandSender player)
-        {
-            return COMMAND;
-        }
-
-        @Override
-        public List<String> getAliases()
+        public List<String> getCommandAliases()
         {
             return aliases;
         }
@@ -146,7 +146,7 @@ public final class StructureRegistry
         public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
         {
             loadRegisteredPatterns();
-            sender.sendMessage(new TextComponentString("Reconstructed " + structures.size() + " structures"));
+            sender.addChatMessage(new TextComponentString("Reconstructed " + structures.size() + " structures"));
         }
 
         //restrict usage of development function
@@ -163,8 +163,7 @@ public final class StructureRegistry
         }
 
         @Override
-        public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos pos)
-        {
+        public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
             return null;
         }
 

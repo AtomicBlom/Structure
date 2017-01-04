@@ -153,9 +153,9 @@ public interface IStructureShapeSidedInventory<E extends IStructureSidedInventor
     }
 
     @Override
-    default boolean isUsableByPlayer(EntityPlayer player)
+    default boolean isUseableByPlayer(EntityPlayer player)
     {
-        return hasOriginTE() && getOriginTE().isUsableByPlayer(player);
+        return hasOriginTE() && getOriginTE().isUseableByPlayer(player);
     }
 
     @Override
