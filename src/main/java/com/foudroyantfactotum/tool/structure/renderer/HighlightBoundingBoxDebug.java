@@ -58,7 +58,8 @@ public class HighlightBoundingBoxDebug {
                 result.getBlockPos(),
                 allEncompassingAxisAlignedBoundingBox,
                 collisionBoxes,
-                player);
+                player,
+                false);
 
         if (collisionBoxes.size() == 0) {
             return;

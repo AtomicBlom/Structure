@@ -212,7 +212,7 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
 
     @Override
     @Deprecated
-    public void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
+    public void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, @Nullable Entity entityIn, boolean p_185477_7_)
     {
         final IStructureTE te = (IStructureTE) world.getTileEntity(pos);
 
