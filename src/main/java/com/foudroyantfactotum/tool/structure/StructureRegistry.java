@@ -156,7 +156,6 @@ public final class StructureRegistry
             if (sender instanceof EntityPlayer)
             {
                 final EntityPlayer ep = (EntityPlayer) sender;
-
                 return ep.capabilities.isCreativeMode;
             }
 
