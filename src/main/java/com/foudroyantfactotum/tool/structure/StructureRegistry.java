@@ -20,7 +20,6 @@ import com.foudroyantfactotum.tool.structure.block.StructureShapeBlock;
 import com.foudroyantfactotum.tool.structure.coordinates.TransformLAG;
 import com.foudroyantfactotum.tool.structure.utility.StructureDefinitionBuilder.StructureDefinitionError;
 import com.google.common.collect.Lists;
-import com.mojang.realmsclient.util.Pair;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
@@ -29,6 +28,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.ProgressManager;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
@@ -76,7 +76,7 @@ public final class StructureRegistry
 
         for (final Pair<StructureBlock, StructureShapeBlock> strucPair : registeredStructures)
         {
-            final StructureBlock block  = strucPair.first();
+            final StructureBlock block  = strucPair.getLeft();
 
             blockBar.step(block.getLocalizedName());
 
@@ -84,7 +84,7 @@ public final class StructureRegistry
             {
                 block.setStructureDefinition(
                         block.getStructureBuild().build(),
-                        strucPair.second(),
+                        strucPair.getRight(),
                         block.getUnlocalizedName().hashCode()
                 );
 
