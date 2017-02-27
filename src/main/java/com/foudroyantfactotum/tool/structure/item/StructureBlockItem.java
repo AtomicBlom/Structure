@@ -48,12 +48,10 @@ public class StructureBlockItem extends ItemBlock
             return false;
         }
 
-        final IBlockState state = block.getStateForPlacement(world, pos, side, hitX, hitY, hitZ, block.getMetaFromState(newState), player, stack);
-
-        final EnumFacing orientation = state.getValue(BlockHorizontal.FACING);
+        final EnumFacing orientation = newState.getValue(BlockHorizontal.FACING);
         boolean mirror = false;
         if (block.canMirror()) {
-            mirror = state.getValue(StructureBlock.MIRROR);
+            mirror = newState.getValue(StructureBlock.MIRROR);
         }
 
         //find master block location
