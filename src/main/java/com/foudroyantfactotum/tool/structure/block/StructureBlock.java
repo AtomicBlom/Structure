@@ -46,6 +46,7 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -233,6 +234,23 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
 
     protected boolean shouldDecompose() {
         return true;
+    }
+
+    @Override
+    public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, EnumHand hand)
+    {
+        IBlockState baseState = super.getStateForPlacement(world, pos, facing, hitX, hitY, hitZ, meta, placer, hand);
+
+        final EnumFacing orientation = EnumFacing.getHorizontal(MathHelper.floor(placer.rotationYaw * 4.0f / 360.0f + 0.5) & 3);
+
+        baseState = baseState.withProperty(BlockHorizontal.FACING, orientation);
+
+        if (canMirror())
+        {
+            final boolean mirrored = placer.isSneaking();
+            baseState = baseState.withProperty(StructureBlock.MIRROR, mirrored);
+        }
+        return baseState;
     }
 
     @Override
