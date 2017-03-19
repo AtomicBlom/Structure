@@ -89,12 +89,7 @@ public class HighlightPreview {
             final boolean mirror = structureBlock.canMirror() && player.isSneaking();
 
             boolean canPlace = StructureQuery.canPlaceStructure(structureBlock, world, potentialPlaceLocation, orientation, mirror, badLocations);
-            @SuppressWarnings("deprecation")
-            IBlockState blockState = structureBlock.getStateFromMeta(heldItem.getMetadata());
-            blockState = blockState.withProperty(BlockHorizontal.FACING, orientation);
-            if (structureBlock.canMirror()) {
-                blockState = blockState.withProperty(StructureBlock.MIRROR, mirror);
-            }
+            IBlockState blockState = structureBlock.getStateForPlacement(world, potentialPlaceLocation, target.sideHit, (float)target.hitVec.xCoord, (float)target.hitVec.yCoord, (float)target.hitVec.zCoord, heldItem.getMetadata(), player, EnumHand.MAIN_HAND);
 
             double x = player.lastTickPosX + (player.posX - player.lastTickPosX) * (double)partialTicks;
             double y = player.lastTickPosY + (player.posY - player.lastTickPosY) * (double)partialTicks;
