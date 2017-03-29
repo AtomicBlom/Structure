@@ -33,6 +33,8 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
+import static com.foudroyantfactotum.tool.structure.block.StructureBlock.MIRROR;
+
 public class HighlightPreview {
     private static final EnumFacing[] modelSources = {
             EnumFacing.UP,
@@ -85,11 +87,14 @@ public class HighlightPreview {
         {
             List<BlockPos.MutableBlockPos> badLocations = Lists.newArrayList();
 
-            final EnumFacing orientation = EnumFacing.getHorizontal(MathHelper.floor(player.rotationYaw * 4.0f / 360.0f + 0.5) & 3);
-            final boolean mirror = structureBlock.canMirror() && player.isSneaking();
+            IBlockState blockState = structureBlock.getStateForPlacement(world, potentialPlaceLocation, target.sideHit, (float)target.hitVec.xCoord, (float)target.hitVec.yCoord, (float)target.hitVec.zCoord, heldItem.getMetadata(), player, EnumHand.MAIN_HAND);
+            final EnumFacing orientation = blockState.getValue(BlockHorizontal.FACING);
+            boolean mirror = false;
+            if (structureBlock.canMirror()) {
+                mirror = blockState.getValue(MIRROR);
+            }
 
             boolean canPlace = StructureQuery.canPlaceStructure(structureBlock, world, potentialPlaceLocation, orientation, mirror, badLocations);
-            IBlockState blockState = structureBlock.getStateForPlacement(world, potentialPlaceLocation, target.sideHit, (float)target.hitVec.xCoord, (float)target.hitVec.yCoord, (float)target.hitVec.zCoord, heldItem.getMetadata(), player, EnumHand.MAIN_HAND);
 
             double x = player.lastTickPosX + (player.posX - player.lastTickPosX) * (double)partialTicks;
             double y = player.lastTickPosY + (player.posY - player.lastTickPosY) * (double)partialTicks;
