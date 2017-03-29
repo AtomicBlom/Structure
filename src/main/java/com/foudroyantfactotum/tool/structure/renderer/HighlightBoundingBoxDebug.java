@@ -48,7 +48,7 @@ public class HighlightBoundingBoxDebug {
         EntityPlayer player = event.getPlayer();
         World world = player.worldObj;
         float partialTicks = event.getPartialTicks();
-        double x = event.getPlayer().lastTickPosX + (event.getPlayer().posX - event.getPlayer().lastTickPosX) * (double)partialTicks;
+        double x = player.lastTickPosX + (player.posX - player.lastTickPosX) * (double)partialTicks;
         double y = player.lastTickPosY + (player.posY - player.lastTickPosY) * (double)partialTicks;
         double z = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * (double)partialTicks;
 
