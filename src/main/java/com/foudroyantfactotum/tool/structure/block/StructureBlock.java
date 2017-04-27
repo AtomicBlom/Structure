@@ -18,8 +18,6 @@ package com.foudroyantfactotum.tool.structure.block;
 import com.foudroyantfactotum.tool.structure.IStructure.ICanMirror;
 import com.foudroyantfactotum.tool.structure.IStructure.IStructureTE;
 import com.foudroyantfactotum.tool.structure.IStructure.structure.IPatternHolder;
-import com.foudroyantfactotum.tool.structure.IStructure.structure.IStructureAspects;
-import com.foudroyantfactotum.tool.structure.StructureRegistry;
 import com.foudroyantfactotum.tool.structure.coordinates.BlockPosUtil;
 import com.foudroyantfactotum.tool.structure.net.StructureNetwork;
 import com.foudroyantfactotum.tool.structure.net.StructurePacket;
@@ -27,6 +25,7 @@ import com.foudroyantfactotum.tool.structure.net.StructurePacketOption;
 import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
 import com.foudroyantfactotum.tool.structure.tileentity.StructureTE;
 import com.google.common.base.MoreObjects;
+import com.foudroyantfactotum.tool.structure.utility.IStructureDefinitionProvider;
 import com.google.common.base.Objects;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
@@ -63,11 +62,9 @@ import java.util.Random;
 import static com.foudroyantfactotum.tool.structure.coordinates.TransformLAG.*;
 
 //@Optional.Interface(modid = WailaProvider.WAILA, iface = "mcp.mobius.waila.api.IWailaDataProvider", striprefs = true)
-public abstract class StructureBlock extends Block implements IPatternHolder, IStructureAspects, ICanMirror//, IWailaDataProvider
+public abstract class StructureBlock extends Block implements IStructureBlock, IPatternHolder, ICanMirror//, IWailaDataProvider
 {
-    private int regHash = 0;
-    private StructureShapeBlock shapeBlock = null;
-    private StructureDefinition structureDefinition = null;
+    private IStructureDefinitionProvider structureDefinitionProvider = null;
     private final boolean canMirror;
 
     public StructureBlock(Material material, boolean canMirror) {
@@ -91,13 +88,6 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
     public StructureBlock(boolean canMirror)
     {
         this(Material.PISTON, canMirror);
-    }
-
-    public void setStructureDefinition(StructureDefinition d, StructureShapeBlock b, int h)
-    {
-        regHash = h;
-        shapeBlock = b;
-        structureDefinition = d;
     }
 
     @Override
@@ -205,14 +195,14 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
         final boolean mirror = getMirror(state);
 
         formStructure(world, pos, state, 0x2);
-        updateExternalNeighbours(world, pos, getPattern(), orientation, mirror, false);
+        updateExternalNeighbours(world, pos, getStructureDefinitionProvider(), orientation, mirror, false);
     }
 
     @Override
     @Deprecated
     public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos neighbourPos)
     {
-        onSharedNeighbourBlockChange(worldIn, pos, regHash, blockIn, state);
+        onSharedNeighbourBlockChange(worldIn, pos, getStructureDefinitionProvider(), blockIn, state);
     }
 
     @Override
@@ -226,7 +216,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
         {
             boolean decompose = shouldDecompose() && (!isPlayerCreative || isPlayerSneaking);
             breakStructure(world, pos, te.getOrientation(), te.getMirror(), decompose);
-            updateExternalNeighbours(world, pos, getPattern(), te.getOrientation(), te.getMirror(), false);
+            updateExternalNeighbours(world, pos, getStructureDefinitionProvider(), te.getOrientation(), te.getMirror(), false);
         } else
         {
             world.setBlockToAir(pos);
@@ -259,7 +249,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
     @Override
     @Deprecated
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, @Nullable Entity entityIn, boolean p_185477_7_) {
-        StructureDefinition pattern = getPattern();
+        StructureDefinition pattern = getStructureDefinitionProvider().getStructureDefinition();
         float[][] collisionBoxes = pattern.getCollisionBoxes();
         if (collisionBoxes != null)
         {
@@ -300,7 +290,8 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
         {
             final StructureTE te = (StructureTE) ute;
 
-            for (MutableBlockPos local : getPattern().getStructureItr())
+            final StructureDefinition structureDefinition = getStructureDefinitionProvider().getStructureDefinition();
+            for (MutableBlockPos local : structureDefinition.getStructureItr())
             {
                 //outward Vector
                 float xSpeed = 0.0f;
@@ -309,7 +300,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
 
                 for (EnumFacing d : EnumFacing.VALUES)
                 {
-                    if (!getPattern().hasBlockAt(local, d))
+                    if (!structureDefinition.hasBlockAt(local, d))
                     {
                         d = localToGlobal(d, te.getOrientation(), te.getMirror());
 
@@ -319,7 +310,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
                     }
                 }
 
-                mutLocalToGlobal(local, pos, te.getOrientation(), te.getMirror(), getPattern().getBlockBounds());
+                mutLocalToGlobal(local, pos, te.getOrientation(), te.getMirror(), structureDefinition.getBlockBounds());
 
                 spawnBreakParticle(world, te, local, xSpeed * scaleVec, ySpeed * scaleVec, zSpeed * scaleVec);
             }
@@ -358,6 +349,16 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
     //       S t r u c t u r e   B l o c k   C o d e
     //=======================================================
 
+    @Override
+    public IStructureDefinitionProvider getStructureDefinitionProvider() {
+        return structureDefinitionProvider;
+    }
+
+    public void setStructureDefinitionProvider(IStructureDefinitionProvider structureDefinitionProvider)
+    {
+        this.structureDefinitionProvider = structureDefinitionProvider;
+    }
+
     public static final PropertyBool MIRROR = PropertyBool.create("mirror");
 
     public static boolean getMirror(IBlockState state)
@@ -372,23 +373,12 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
     }
 
     @Override
-    public StructureDefinition getPattern()
-    {
-        return structureDefinition;
-    }
-
-    public int getRegHash()
-    {
-        return regHash;
-    }
-
-    @Override
     public boolean onStructureBlockActivated(World world, BlockPos pos, EntityPlayer player, EnumHand hand, BlockPos callPos, EnumFacing side, BlockPos local, float sx, float sy, float sz)
     {
         return false;
     }
 
-    public static void onSharedNeighbourBlockChange(IBlockAccess world, BlockPos pos, int hash, Block neighbourBlock, IBlockState state)
+    public static void onSharedNeighbourBlockChange(IBlockAccess world, BlockPos pos, IStructureDefinitionProvider structure, Block neighbourBlock, IBlockState state)
     {
         final TileEntity ute = world.getTileEntity(pos);
 
@@ -398,7 +388,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
         }
 
         final IStructureTE te = (IStructureTE) ute;
-        final StructureBlock sb = StructureRegistry.getStructureBlock(te.getRegHash());
+        final StructureBlock sb = structure.getStructureDefinition().getMasterBlock();
 
         if (sb == null)
         {
@@ -408,7 +398,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
 
         for (final EnumFacing f : EnumFacing.VALUES)
         {
-            if (!sb.getPattern().hasBlockAt(te.getLocal(), f))
+            if (!sb.getStructureDefinitionProvider().getStructureDefinition().hasBlockAt(te.getLocal(), f))
             {
                 continue;
             }
@@ -438,7 +428,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
             if (te.getLocal().equals(BlockPos.ORIGIN))
             {
                 StructureNetwork.network.sendToAllAround(
-                        new StructurePacket(pos, hash, orientation, mirror, StructurePacketOption.BOOM_PARTICLE),
+                        new StructurePacket(pos, structure.getRegistryName(), orientation, mirror, StructurePacketOption.BOOM_PARTICLE),
                         new NetworkRegistry.TargetPoint(ute.getWorld().provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 30)
                 );
             }
@@ -449,9 +439,10 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
 
     public void formStructure(World world, BlockPos origin, IBlockState state, int flag)
     {
+        final IStructureDefinitionProvider structureDefinitionProvider = getStructureDefinitionProvider();
         final EnumFacing orientation = state.getValue(BlockHorizontal.FACING);
         final boolean mirror = getMirror(state);
-        IBlockState shapeState = shapeBlock
+        IBlockState shapeState = structureDefinitionProvider.getStructureDefinition().getShapeBlock()
                 .getDefaultState()
                 .withProperty(BlockHorizontal.FACING, orientation);
 
@@ -460,7 +451,8 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
             shapeState = shapeState.withProperty(MIRROR, mirror);
         }
 
-        final StructureDefinition pattern = getPattern();
+
+        final StructureDefinition pattern = structureDefinitionProvider.getStructureDefinition();
         for (final MutableBlockPos local : pattern.getStructureItr())
         {
             if (!pattern.hasBlockAt(local))
@@ -484,7 +476,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
 
             if (ssBlock != null)
             {
-                ssBlock.configureBlock(new BlockPos(local), regHash);
+                ssBlock.configureBlock(new BlockPos(local), this.structureDefinitionProvider);
             } else
             {
                 world.setBlockToAir(blockCoord);
@@ -495,12 +487,14 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
 
     public void breakStructure(World world, BlockPos origin, EnumFacing orientation, boolean mirror, boolean decompose)
     {
-        for (final MutableBlockPos local : getPattern().getStructureItr())
+        final IStructureDefinitionProvider structureDefinitionProvider = getStructureDefinitionProvider();
+        final StructureDefinition structureDefinition = structureDefinitionProvider.getStructureDefinition();
+        for (final MutableBlockPos local : structureDefinition.getStructureItr())
         {
-            if (getPattern().hasBlockAt(local))
+            if (structureDefinition.hasBlockAt(local))
             {
-                final IBlockState block = getPattern().getBlock(local).getBlockState();
-                mutLocalToGlobal(local, origin, orientation, mirror, getPattern().getBlockBounds());
+                final IBlockState block = structureDefinition.getBlock(local).getBlockState();
+                mutLocalToGlobal(local, origin, orientation, mirror, structureDefinition.getBlockBounds());
                 final IBlockState worldBlock = world.getBlockState(local);
 
                 if (worldBlock.getBlock() instanceof StructureBlock || worldBlock.getBlock() instanceof StructureShapeBlock)
@@ -516,8 +510,9 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
         }
     }
 
-    public static void updateExternalNeighbours(World world, BlockPos origin, StructureDefinition sd, EnumFacing orientation, boolean mirror, boolean notifyBlocks)
+    public static void updateExternalNeighbours(World world, BlockPos origin, IStructureDefinitionProvider sdp, EnumFacing orientation, boolean mirror, boolean notifyBlocks)
     {
+        StructureDefinition sd = sdp.getStructureDefinition();
         for (final MutableBlockPos local : sd.getStructureItr())
         {
             for (EnumFacing d : EnumFacing.VALUES)
@@ -603,7 +598,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
     public String toString()
     {
         return MoreObjects.toStringHelper(this)
-                .add("Structure Definition", getPattern())
+                .add("Structure Definition", getStructureDefinitionProvider())
                 .toString();
     }
 }

@@ -16,6 +16,8 @@
 package com.foudroyantfactotum.tool.structure.utility;
 
 import com.foudroyantfactotum.tool.structure.IStructure.IPartBlockState;
+import com.foudroyantfactotum.tool.structure.block.StructureBlock;
+import com.foudroyantfactotum.tool.structure.block.StructureShapeBlock;
 import com.foudroyantfactotum.tool.structure.coordinates.BlockPosUtil;
 import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
 import com.google.common.collect.ImmutableMap;
@@ -40,9 +42,19 @@ public final class StructureDefinitionBuilder
 
     private IPartBlockState[][][] states;
     private float[][] collisionBoxes;
+    private StructureBlock masterBlock;
+    private StructureShapeBlock shapeBlock;
 
     public StructureDefinition build()
     {
+        if (masterBlock == null) {
+            throw new StructureDefinitionError("Missing master block");
+        }
+
+        if (shapeBlock == null) {
+            throw new StructureDefinitionError("Missing shape block");
+        }
+
         if(conBlocks == null)
         {
             throw new StructureDefinitionError("Missing block states");
@@ -128,7 +140,9 @@ public final class StructureDefinitionBuilder
                 masterPosition,
                 toolFormPosition,
                 states,
-                collisionBoxes);
+                collisionBoxes,
+                masterBlock,
+                shapeBlock);
     }
 
     /**
@@ -317,6 +331,24 @@ public final class StructureDefinitionBuilder
     public void setCollisionBoxes(float[]... collisionBoxes)
     {
         this.collisionBoxes = collisionBoxes;
+    }
+
+    public void setMasterBlock(StructureBlock block)
+    {
+        this.masterBlock = block;
+    }
+
+    public StructureBlock getMasterBlock() {
+        return this.masterBlock;
+    }
+
+    public void setShapeBlock(StructureShapeBlock block)
+    {
+        this.shapeBlock = block;
+    }
+
+    public StructureShapeBlock getShapeBlock() {
+        return this.shapeBlock;
     }
 
     public static class StructureDefinitionError extends Error

@@ -15,13 +15,15 @@
  */
 package com.foudroyantfactotum.tool.structure.net;
 
-import com.foudroyantfactotum.tool.structure.StructureRegistry;
+import com.foudroyantfactotum.tool.structure.Structure;
 import com.foudroyantfactotum.tool.structure.block.StructureBlock;
+import com.foudroyantfactotum.tool.structure.utility.IStructureDefinitionProvider;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.world.World;
@@ -41,7 +43,7 @@ public class StructurePacket implements IMessage
     public static final int orientationMask = 0x7;
 
     private BlockPos pos;
-    private int structureHash;
+    private ResourceLocation structureRegistryName;
     private int orientationAndMirror;
     private StructurePacketOption sc;
 
@@ -50,11 +52,11 @@ public class StructurePacket implements IMessage
         //no op
     }
 
-    public StructurePacket(BlockPos pos, int structureHash, EnumFacing orientation, boolean mirror, StructurePacketOption sc)
+    public StructurePacket(BlockPos pos, ResourceLocation structureRegistryName, EnumFacing orientation, boolean mirror, StructurePacketOption sc)
     {
         this.pos = pos;
 
-        this.structureHash = structureHash;
+        this.structureRegistryName = structureRegistryName;
         orientationAndMirror = orientation.ordinal() | (mirror ? flagMirrored : 0);
         this.sc = sc;
     }
@@ -67,7 +69,7 @@ public class StructurePacket implements IMessage
         final int z = ByteBufUtils.readVarInt(buf, 5);
 
         pos = new BlockPos(x,y,z);
-        structureHash = ByteBufUtils.readVarInt(buf, 5);
+        structureRegistryName = new ResourceLocation(ByteBufUtils.readUTF8String(buf));
         orientationAndMirror = ByteBufUtils.readVarShort(buf);
         sc = StructurePacketOption.values()[ByteBufUtils.readVarShort(buf)];
     }
@@ -79,7 +81,7 @@ public class StructurePacket implements IMessage
         ByteBufUtils.writeVarInt(buf, pos.getY(), 5);
         ByteBufUtils.writeVarInt(buf, pos.getZ(), 5);
 
-        ByteBufUtils.writeVarInt(buf, structureHash, 5);
+        ByteBufUtils.writeUTF8String(buf, structureRegistryName.toString());
 
         ByteBufUtils.writeVarShort(buf, orientationAndMirror);
         ByteBufUtils.writeVarShort(buf, sc.ordinal());
@@ -91,7 +93,8 @@ public class StructurePacket implements IMessage
         public IMessage onMessage(StructurePacket msg, MessageContext ctx)
         {
             final World world = ctx.getServerHandler().player.world;
-            final StructureBlock block = StructureRegistry.getStructureBlock(msg.structureHash);
+            final IStructureDefinitionProvider structureDefinition = Structure.getStructureDefinitionByRegistryName(msg.structureRegistryName);
+            final StructureBlock block = structureDefinition.getStructureDefinition().getMasterBlock();
 
             if (block == null)
             {
@@ -113,17 +116,17 @@ public class StructurePacket implements IMessage
 
                 world.setBlockState(msg.pos, state, 0x2);
                 block.formStructure(world, msg.pos, state, 0x2);
-                updateExternalNeighbours(world, msg.pos, block.getPattern(), orientation, mirror, true);
+                updateExternalNeighbours(world, msg.pos, block.getStructureDefinitionProvider(), orientation, mirror, true);
 
                 return null;
             }
 
-            for (final MutableBlockPos local : block.getPattern().getStructureItr())
+            for (final MutableBlockPos local : block.getStructureDefinitionProvider().getStructureDefinition().getStructureItr())
             {
                 final BlockPos coord = bindLocalToGlobal(
                         msg.pos, local,
                         orientation, mirror,
-                        block.getPattern().getBlockBounds()
+                        block.getStructureDefinitionProvider().getStructureDefinition().getBlockBounds()
                 );
 
                 //outward Vector
@@ -133,7 +136,7 @@ public class StructurePacket implements IMessage
 
                 for (EnumFacing d :EnumFacing.VALUES)
                 {
-                    if (!block.getPattern().hasBlockAt(local, d))
+                    if (!block.getStructureDefinitionProvider().getStructureDefinition().hasBlockAt(local, d))
                     {
                         d = localToGlobal(d, orientation, mirror);
 

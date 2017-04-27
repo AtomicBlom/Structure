@@ -16,6 +16,8 @@
 package com.foudroyantfactotum.tool.structure.registry;
 
 import com.google.common.base.MoreObjects;
+import com.foudroyantfactotum.tool.structure.block.StructureBlock;
+import com.foudroyantfactotum.tool.structure.block.StructureShapeBlock;
 import com.google.common.base.Objects;
 import com.foudroyantfactotum.tool.structure.IStructure.IPartBlockState;
 import com.foudroyantfactotum.tool.structure.coordinates.BlockPosUtil;
@@ -71,6 +73,8 @@ public class StructureDefinition
 
     private IPartBlockState[][][] blocks;
     private float[][] collisionBoxes;
+    private StructureShapeBlock shapeBlock;
+    private StructureBlock masterBlock;
 
     private StructureDefinition()
     {
@@ -83,7 +87,9 @@ public class StructureDefinition
                                BlockPos toolFormPosition,
 
                                IPartBlockState[][][] blocks,
-                               float[][] collisionBoxes)
+                               float[][] collisionBoxes,
+                               StructureBlock masterBlock,
+                               StructureShapeBlock shapeBlock)
     {
         this.sbLayout = sbLayout;
         this.sbLayoutSize = sbLayoutSize;
@@ -98,6 +104,8 @@ public class StructureDefinition
                 sbLayoutSize.getX()/2,
                 sbLayoutSize.getY()/2,
                 sbLayoutSize.getZ()/2);
+        this.masterBlock = masterBlock;
+        this.shapeBlock = shapeBlock;
     }
 
     public boolean hasBlockAt(BlockPos loc, EnumFacing d) { return hasBlockAt(loc.getX() + d.getFrontOffsetX(), loc.getY() + d.getFrontOffsetY(), loc.getZ() + d.getFrontOffsetZ()); }
@@ -166,6 +174,14 @@ public class StructureDefinition
     public float[][] getCollisionBoxes()
     {
         return collisionBoxes;
+    }
+
+    public StructureBlock getMasterBlock() {
+        return masterBlock;
+    }
+
+    public StructureShapeBlock getShapeBlock() {
+        return shapeBlock;
     }
 
     public String toString(){

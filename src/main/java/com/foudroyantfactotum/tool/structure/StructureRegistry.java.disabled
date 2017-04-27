@@ -36,8 +36,8 @@ import static net.minecraftforge.fml.common.ProgressManager.ProgressBar;
 
 public final class StructureRegistry
 {
-    private static Map<Integer, StructureBlock> structures = new HashMap<>();
-    private static List<Pair<StructureBlock, StructureShapeBlock>> registeredStructures = new LinkedList<>();
+    //private static Map<Integer, StructureBlock> structures = new HashMap<>();
+    //private static List<Pair<StructureBlock, StructureShapeBlock>> registeredStructures = new LinkedList<>();
 
     private static String MOD_ID = null;
 
@@ -60,11 +60,11 @@ public final class StructureRegistry
      *
      * @param structure structure to be registered.
      */
-    public static void registerStructureForLoad(StructureBlock structure, StructureShapeBlock shape)
+    /*public static void registerStructureForLoad(StructureBlock structure, StructureShapeBlock shape)
     {
         //todo add test for correct TE configuration
         registeredStructures.add(Pair.of(structure, shape));
-    }
+    }*/
 
     /***
      * loadRegisteredPatterns() is called on onFMLInitialization after all blocks have been loaded. This allows for
@@ -115,69 +115,4 @@ public final class StructureRegistry
         return structures.get(hash);
     }
 
-    /***
-     * Command (class) for reloading the structures in-game after jvm hot swap
-     * Should only be enabled for development purposes.
-     */
-    public static class CommandReloadStructures implements ICommand
-    {
-        private static final String COMMAND = "RELOAD_STRUCTURES";
-        private static final List<String> aliases = Lists.newArrayList(COMMAND);
-
-        @Override
-        public String getName()
-        {
-            return COMMAND;
-        }
-
-        @Override
-        public String getUsage(ICommandSender player)
-        {
-            return COMMAND;
-        }
-
-        @Override
-        public List<String> getAliases()
-        {
-            return aliases;
-        }
-
-        @Override
-        public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
-        {
-            loadRegisteredPatterns();
-            sender.sendMessage(new TextComponentString("Reconstructed " + structures.size() + " structures"));
-        }
-
-        //restrict usage of development function
-        @Override
-        public boolean checkPermission(MinecraftServer server, ICommandSender sender)
-        {
-            if (sender instanceof EntityPlayer)
-            {
-                final EntityPlayer ep = (EntityPlayer) sender;
-                return ep.capabilities.isCreativeMode;
-            }
-
-            return false;
-        }
-
-        @Override
-        public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos pos)
-        {
-            return null;
-        }
-
-        @Override
-        public boolean isUsernameIndex(String[] args, int index)
-        {
-            return false;
-        }
-
-        @Override
-        public int compareTo(ICommand iCommand)
-        {
-            return 0;
-        }
-    }
 }
