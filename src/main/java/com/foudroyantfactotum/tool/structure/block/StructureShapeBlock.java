@@ -136,7 +136,7 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
             return te.getMasterBlockInstance().getPickBlock(state, target, world, pos, player);
         }
 
-        return null;
+        return ItemStack.EMPTY;
     }
 
     @Override
