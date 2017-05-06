@@ -92,7 +92,7 @@ public class HighlightPreview {
         {
             List<BlockPos.MutableBlockPos> badLocations = Lists.newArrayList();
 
-            IBlockState blockState = structureBlock.getStateForPlacement(world, potentialPlaceLocation, target.sideHit, (float)target.hitVec.xCoord, (float)target.hitVec.yCoord, (float)target.hitVec.zCoord, heldItem.getMetadata(), player, EnumHand.MAIN_HAND);
+            IBlockState blockState = structureBlock.getStateForPlacement(world, potentialPlaceLocation, target.sideHit, (float)target.hitVec.xCoord, (float)target.hitVec.yCoord, (float)target.hitVec.zCoord, heldItem.getMetadata(), player, heldItem);
             final EnumFacing orientation = blockState.getValue(BlockHorizontal.FACING);
             boolean mirror = false;
             if (structureBlock.canMirror()) {
