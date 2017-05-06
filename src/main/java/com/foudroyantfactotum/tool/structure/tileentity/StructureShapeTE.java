@@ -105,7 +105,7 @@ public class StructureShapeTE extends TileEntity implements IStructureTE
         return masterLocation.get();
     }
 
-    public IStructureDefinitionProvider getStructureDefinition()
+    public IStructureDefinitionProvider getStructureDefinitionProvider()
     {
         return structureDefinition;
     }
@@ -178,7 +178,7 @@ public class StructureShapeTE extends TileEntity implements IStructureTE
     {
         return MoreObjects.toStringHelper(this)
                 .add("local", local)
-                .add("structureRegistryName", structureDefinition.getRegistryName())
+                .add("structureRegistryName", structureDefinition != null ? structureDefinition.getRegistryName() : null)
                 .add("masterLocation", masterLocation)
                 .add("originTE", originTE)
                 .add("hasNotAttemptedAcquisitionOfOriginTE", hasNotAttemptedAcquisitionOfOriginTE)

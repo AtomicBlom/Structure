@@ -133,9 +133,9 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
 
         if (te != null)
         {
-            if (te.getStructureDefinition().getStructureDefinition().getMasterBlock() != null)
+            if (te.getStructureDefinitionProvider().getStructureDefinition().getMasterBlock() != null)
             {
-                return te.getStructureDefinition().getStructureDefinition().getMasterBlock().getPickBlock(state, target, world, pos, player);
+                return te.getStructureDefinitionProvider().getStructureDefinition().getMasterBlock().getPickBlock(state, target, world, pos, player);
             }
         }
 
@@ -235,7 +235,7 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
         if (te != null)
         {
             final BlockPos mloc = te.getMasterBlockLocation();
-            final StructureBlock sb = te.getStructureDefinition().getStructureDefinition().getMasterBlock();
+            final StructureBlock sb = te.getStructureDefinitionProvider().getStructureDefinition().getMasterBlock();
 
             if (sb == null) {
                 StructureLogger.info("Attempt to get collision boxes before the Tile Entity is ready.");
@@ -286,7 +286,7 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
 
         if (te != null)
         {
-            final StructureBlock block = te.getStructureDefinition().getStructureDefinition().getMasterBlock();
+            final StructureBlock block = te.getStructureDefinitionProvider().getStructureDefinition().getMasterBlock();
 
             if (block != null)
             {
@@ -304,7 +304,7 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
         final boolean isPlayerCreative = player != null && player.capabilities.isCreativeMode;
         final boolean isPlayerSneaking = player != null && player.isSneaking();
 
-        final StructureBlock sb = te.getStructureDefinition().getStructureDefinition().getMasterBlock();
+        final StructureBlock sb = te.getStructureDefinitionProvider().getStructureDefinition().getMasterBlock();
 
         if (sb != null)
         {
@@ -339,7 +339,7 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
 
         if (te != null)
         {
-            final StructureBlock block = te.getStructureDefinition().getStructureDefinition().getMasterBlock();
+            final StructureBlock block = te.getStructureDefinitionProvider().getStructureDefinition().getMasterBlock();
 
             if (block != null)
             {
@@ -357,7 +357,7 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
     public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos neighbourPos)
     {
         onSharedNeighbourBlockChange(world, pos,
-                ((StructureShapeTE) world.getTileEntity(pos)).getStructureDefinition(),
+                ((StructureShapeTE) world.getTileEntity(pos)).getStructureDefinitionProvider(),
                 blockIn,
                 state
         );

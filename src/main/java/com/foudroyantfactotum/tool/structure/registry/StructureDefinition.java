@@ -165,8 +165,13 @@ public class StructureDefinition
             public Iterator<MutableBlockPos> iterator()
             {
                 return new StructureIterable(
-                        -masterPosition.getX(),                -masterPosition.getY(),                   -masterPosition.getZ(),
-                        blocks.length - masterPosition.getX(), blocks[0].length - masterPosition.getY(), blocks[0][0].length - masterPosition.getZ());
+                        -masterPosition.getX(),
+                        -masterPosition.getY(),
+                        -masterPosition.getZ(),
+                        blocks.length - masterPosition.getX(),
+                        blocks[0].length - masterPosition.getY(),
+                        blocks[0][0].length - masterPosition.getZ()
+                );
             }
         };
     }

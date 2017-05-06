@@ -1,6 +1,7 @@
 package com.foudroyantfactotum.tool.structure;
 
 import com.foudroyantfactotum.tool.structure.coordinates.TransformLAG;
+import com.foudroyantfactotum.tool.structure.net.StructureNetwork;
 import com.foudroyantfactotum.tool.structure.utility.IStructureDefinitionProvider;
 import com.foudroyantfactotum.tool.structure.utility.StructureLogger;
 import com.google.common.base.Preconditions;
@@ -9,6 +10,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.common.registry.IForgeRegistry;
 import net.minecraftforge.fml.common.registry.RegistryBuilder;
 import java.util.Map;
@@ -24,12 +26,14 @@ public class Structure
      * Handles the earliest initialization of Structure. Fires the RegisterStructureModIDEvent which
      * implementing mods must handle for structure to work properly.
      */
-    public static void configure(String modId)
+    public static void configure(String modId, SimpleNetworkWrapper networkChannel, int channelNumber)
     {
         Preconditions.checkNotNull(modId, "The mod ID was not specified.");
+        Preconditions.checkNotNull(networkChannel, "The network channel was not provided.");
 
         StructureLogger.setModId(modId);
         TransformLAG.initStatic();
+        StructureNetwork.init(networkChannel, channelNumber);
 
         MinecraftForge.EVENT_BUS.register(new Structure());
 

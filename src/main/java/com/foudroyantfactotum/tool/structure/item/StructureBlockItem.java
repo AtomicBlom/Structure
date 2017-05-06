@@ -17,6 +17,7 @@ package com.foudroyantfactotum.tool.structure.item;
 
 import com.foudroyantfactotum.tool.structure.block.StructureBlock;
 import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
+import com.foudroyantfactotum.tool.structure.utility.StructureQuery;
 import com.google.common.base.Preconditions;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;

@@ -28,7 +28,7 @@ public interface IStructureTE extends ITileEntity
 {
     default IBlockState getTransmutedBlock()
     {
-        final IStructureDefinitionProvider sb = getStructureDefinition();
+        final IStructureDefinitionProvider sb = getStructureDefinitionProvider();
 
         if (sb != null)
         {
@@ -51,7 +51,7 @@ public interface IStructureTE extends ITileEntity
         return Blocks.AIR.getDefaultState();
     }
 
-    IStructureDefinitionProvider getStructureDefinition();
+    IStructureDefinitionProvider getStructureDefinitionProvider();
     BlockPos getMasterBlockLocation();
 
     void configureBlock(BlockPos local, IStructureDefinitionProvider structureDefinitionProvider);
