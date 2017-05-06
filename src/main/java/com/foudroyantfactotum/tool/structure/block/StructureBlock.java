@@ -48,6 +48,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -273,6 +274,17 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
     {
         return onStructureBlockActivated(worldIn, pos, playerIn, hand, pos, side, BlockPos.ORIGIN, hitX, hitY, hitZ);
+    }
+
+    @Override
+    public void onBlockExploded(World world, BlockPos pos, Explosion explosion)
+    {
+        if (canDropFromExplosion(explosion))
+        {
+            //can't be bothered doing an access transformer on the explosion size, hard coding to 50% chance.
+            dropBlockAsItemWithChance(world, pos, world.getBlockState(pos), 0.5f, 0);
+        }
+        super.onBlockExploded(world, pos, explosion);
     }
 
     @Override
