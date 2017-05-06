@@ -37,6 +37,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -45,7 +46,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Function;
 
 import static com.foudroyantfactotum.tool.structure.block.StructureBlock.*;
 import static com.foudroyantfactotum.tool.structure.coordinates.TransformLAG.localToGlobalCollisionBoxes;
@@ -137,6 +137,18 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
         }
 
         return null;
+    }
+
+    @Override
+    public void onBlockExploded(World world, BlockPos pos, Explosion explosion)
+    {
+        final StructureShapeTE te = (StructureShapeTE) world.getTileEntity(pos);
+
+        if (te != null && te.getMasterBlockInstance() != null)
+        {
+            te.getMasterBlockInstance().onBlockExploded(world, te.getMasterBlockLocation(), explosion);
+        }
+        super.onBlockExploded(world, pos, explosion);
     }
 
     @Override
