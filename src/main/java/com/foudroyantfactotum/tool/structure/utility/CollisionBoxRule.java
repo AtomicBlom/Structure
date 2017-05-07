@@ -9,7 +9,7 @@ public class CollisionBoxRule
     final Function<IBlockState, Boolean> rule;
     private final float[][] collisionBoxes;
 
-    CollisionBoxRule(Function<IBlockState, Boolean> rule, float[][] collisionBoxes) {
+    CollisionBoxRule(Function<IBlockState, Boolean> rule, float[]... collisionBoxes) {
         this.rule = rule;
         this.collisionBoxes = collisionBoxes;
     }

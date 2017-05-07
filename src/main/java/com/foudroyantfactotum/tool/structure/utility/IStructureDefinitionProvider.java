@@ -12,4 +12,5 @@ public interface IStructureDefinitionProvider extends IForgeRegistryEntry<IStruc
     void rebuildStructure();
 
     List<float[]> getCollisionBoxes(IBlockState state);
+    float[] getSelectionBox(IBlockState state);
 }

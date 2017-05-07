@@ -37,12 +37,15 @@ public abstract class StructureDefinitionProviderBase implements IStructureDefin
     }
 
     public List<float[]> getCollisionBoxes(IBlockState state) {
-        List<float[]> collisionBoxes = collisionBoxCache.get(state);
-        if (collisionBoxes == null) {
-            collisionBoxes = structureDefinition.getCollisionBoxes(state);
-            collisionBoxCache.put(state, collisionBoxes);
-        }
+        List<float[]> collisionBoxes = collisionBoxCache
+                .computeIfAbsent(state, blockState -> structureDefinition.getCollisionBoxes(blockState));
         return collisionBoxes;
+    }
+
+    @Override
+    public float[] getSelectionBox(IBlockState state)
+    {
+        return structureDefinition.getSelectionBox(state);
     }
 
     public StructureDefinition getStructureDefinition() {

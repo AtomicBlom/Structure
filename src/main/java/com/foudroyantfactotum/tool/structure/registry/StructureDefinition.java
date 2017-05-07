@@ -28,10 +28,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.util.EnumFacing;
 
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -79,6 +76,7 @@ public class StructureDefinition
     private List<CollisionBoxRule> collisionBoxes;
     private StructureShapeBlock shapeBlock;
     private StructureBlock masterBlock;
+    private List<CollisionBoxRule> selectionBoxRules;
 
     private StructureDefinition()
     {
@@ -92,6 +90,7 @@ public class StructureDefinition
 
                                IPartBlockState[][][] blocks,
                                List<CollisionBoxRule> collisionBoxes,
+                               List<CollisionBoxRule> selectionBoxRules,
                                StructureBlock masterBlock,
                                StructureShapeBlock shapeBlock)
     {
@@ -103,6 +102,7 @@ public class StructureDefinition
 
         this.blocks = blocks;
         this.collisionBoxes = collisionBoxes;
+        this.selectionBoxRules = selectionBoxRules;
 
         sbLayoutSizeHlf = BlockPosUtil.of(
                 sbLayoutSize.getX()/2,
@@ -179,6 +179,15 @@ public class StructureDefinition
                 .filter((rule) -> rule.matches(state))
                 .flatMap((rule) -> Arrays.stream(rule.getCollisionBoxes()))
                 .collect(Collectors.toList());
+    }
+
+    public float[] getSelectionBox(IBlockState state)
+    {
+        return selectionBoxRules.stream()
+                .filter((rule) -> rule.matches(state))
+                .findFirst()
+                .map(collisionBoxRule -> collisionBoxRule.getCollisionBoxes()[0])
+                .orElse(null);
     }
 
     public StructureBlock getMasterBlock() {

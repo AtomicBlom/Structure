@@ -45,6 +45,7 @@ public final class StructureDefinitionBuilder
 
     private IPartBlockState[][][] states;
     private List<CollisionBoxRule> collisionBoxes = Lists.newArrayList();
+    private List<CollisionBoxRule> selectionBoxRules = Lists.newArrayList();
     private StructureBlock masterBlock;
     private StructureShapeBlock shapeBlock;
 
@@ -131,6 +132,9 @@ public final class StructureDefinitionBuilder
         {
             collisionBox.adjustToMasterBlock(masterPosition);
         }
+        for (final CollisionBoxRule selectionBox : selectionBoxRules) {
+            selectionBox.adjustToMasterBlock(masterPosition);
+        }
 
         //correct tool form location
         toolFormPosition = toolFormPosition.subtract(masterPosition);
@@ -142,6 +146,7 @@ public final class StructureDefinitionBuilder
                 toolFormPosition,
                 states,
                 collisionBoxes,
+                selectionBoxRules,
                 masterBlock,
                 shapeBlock);
     }
@@ -328,6 +333,9 @@ public final class StructureDefinitionBuilder
     public void setCollisionBoxRule(Function<IBlockState, Boolean> condition, float[]... collisionBoxes) {
         this.collisionBoxes.add(new CollisionBoxRule(condition, collisionBoxes));
     }
+    public void setSelectionBoxRule(Function<IBlockState, Boolean> condition, float[] selectionBox) {
+        this.selectionBoxRules.add(new CollisionBoxRule(condition, selectionBox));
+    }
 
     /**
      * set collision boxes of structure
@@ -336,6 +344,9 @@ public final class StructureDefinitionBuilder
     public void setCollisionBoxes(float[]... collisionBoxes)
     {
         this.collisionBoxes.add(new CollisionBoxRule((blockState) -> true, collisionBoxes));
+    }
+    public void setSelectionBox(float[] selectionBox) {
+        this.selectionBoxRules.add(new CollisionBoxRule((blockState) -> true, selectionBox));
     }
 
     public void setMasterBlock(StructureBlock block)

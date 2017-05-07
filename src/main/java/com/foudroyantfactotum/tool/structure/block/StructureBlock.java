@@ -29,6 +29,7 @@ import com.google.common.base.MoreObjects;
 import com.foudroyantfactotum.tool.structure.utility.IStructureDefinitionProvider;
 import com.foudroyantfactotum.tool.structure.utility.StructureLogger;
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.SoundType;
@@ -61,6 +62,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 
+import static com.foudroyantfactotum.tool.structure.block.StructureShapeBlock.EMPTY_BOUNDS;
 import static com.foudroyantfactotum.tool.structure.coordinates.TransformLAG.*;
 
 //@Optional.Interface(modid = WailaProvider.WAILA, iface = "mcp.mobius.waila.api.IWailaDataProvider", striprefs = true)
@@ -264,6 +266,29 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
+    @Deprecated
+    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World world, BlockPos pos)
+    {
+        final float[] selectionBox = structureDefinitionProvider.getSelectionBox(state);
+        if (selectionBox != null)
+        {
+            final List<AxisAlignedBB> axisAlignedBBS = localToGlobalCollisionBoxes(
+                    pos,
+                    0, 0, 0,
+                    null, null, Lists.newArrayList(selectionBox),
+                    state.getValue(BlockHorizontal.FACING), getMirror(state)
+            );
+            if (!axisAlignedBBS.isEmpty())
+            {
+                return axisAlignedBBS.get(0);
+            }
+        }
+        return EMPTY_BOUNDS;
+        //return world.getTileEntity(pos).getRenderBoundingBox();
+    }
+
+    @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
     {
         return onStructureBlockActivated(worldIn, pos, playerIn, hand, pos, side, BlockPos.ORIGIN, hitX, hitY, hitZ);
@@ -328,15 +353,6 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
     public boolean addHitEffects(IBlockState state, World worldObj, RayTraceResult target, ParticleManager manager)
     {
         return super.addHitEffects(state, worldObj, target, manager);
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    @Deprecated
-    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World world, BlockPos pos)
-    {
-        //return EMPTY_BOUNDS;
-        return world.getTileEntity(pos).getRenderBoundingBox();
     }
 
     @Override
