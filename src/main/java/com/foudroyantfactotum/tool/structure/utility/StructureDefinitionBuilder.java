@@ -22,6 +22,7 @@ import com.foudroyantfactotum.tool.structure.coordinates.BlockPosUtil;
 import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -29,6 +30,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
 
 import java.util.BitSet;
+import java.util.List;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -41,7 +44,7 @@ public final class StructureDefinitionBuilder
     private BlockPos toolFormPosition;
 
     private IPartBlockState[][][] states;
-    private float[][] collisionBoxes;
+    private List<CollisionBoxRule> collisionBoxes = Lists.newArrayList();
     private StructureBlock masterBlock;
     private StructureShapeBlock shapeBlock;
 
@@ -124,11 +127,9 @@ public final class StructureDefinitionBuilder
         }
 
         //correct collision bounds.
-        for (float[] bb: collisionBoxes)
+        for (final CollisionBoxRule collisionBox : collisionBoxes)
         {
-            bb[0] -= masterPosition.getX(); bb[3] -= masterPosition.getX();
-            bb[1] -= masterPosition.getY(); bb[4] -= masterPosition.getY();
-            bb[2] -= masterPosition.getZ(); bb[5] -= masterPosition.getZ();
+            collisionBox.adjustToMasterBlock(masterPosition);
         }
 
         //correct tool form location
@@ -324,13 +325,17 @@ public final class StructureDefinitionBuilder
         this.toolFormPosition = toolFormPosition;
     }
 
+    public void setCollisionBoxRule(Function<IBlockState, Boolean> condition, float[]... collisionBoxes) {
+        this.collisionBoxes.add(new CollisionBoxRule(condition, collisionBoxes));
+    }
+
     /**
      * set collision boxes of structure
      * @param collisionBoxes arrays of collision. must have a length of 6 l=lower left back u=upper right front [lx, ly, lz, ux, uy, uz]
      */
     public void setCollisionBoxes(float[]... collisionBoxes)
     {
-        this.collisionBoxes = collisionBoxes;
+        this.collisionBoxes.add(new CollisionBoxRule((blockState) -> true, collisionBoxes));
     }
 
     public void setMasterBlock(StructureBlock block)
@@ -358,4 +363,5 @@ public final class StructureDefinitionBuilder
             super(msg);
         }
     }
+
 }

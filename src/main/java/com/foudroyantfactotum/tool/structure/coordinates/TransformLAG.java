@@ -280,7 +280,7 @@ public final class TransformLAG
     public static void localToGlobalCollisionBoxes(
             BlockPos pos,
             int offsetX, int offsetY, int offsetZ,
-            AxisAlignedBB aabb, List<AxisAlignedBB> boundingBoxList, float[][] collB,
+            AxisAlignedBB aabb, List<AxisAlignedBB> boundingBoxList, List<float[]> collB,
             EnumFacing orientation, boolean mirror)
     {
         int x = pos.getX();

@@ -1,13 +1,18 @@
 package com.foudroyantfactotum.tool.structure.utility;
 
 import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
+import com.google.common.collect.Maps;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.ResourceLocation;
 import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
 
 public abstract class StructureDefinitionProviderBase implements IStructureDefinitionProvider
 {
     private ResourceLocation registryName;
     private StructureDefinition structureDefinition;
+    private Map<IBlockState, List<float[]>> collisionBoxCache = Maps.newHashMap();
 
     @Override
     public IStructureDefinitionProvider setRegistryName(ResourceLocation name)
@@ -28,6 +33,16 @@ public abstract class StructureDefinitionProviderBase implements IStructureDefin
     public void rebuildStructure() {
         structureDefinition = getStructureBuild().build();
         structureDefinition.getMasterBlock().setStructureDefinitionProvider(this);
+        collisionBoxCache.clear();
+    }
+
+    public List<float[]> getCollisionBoxes(IBlockState state) {
+        List<float[]> collisionBoxes = collisionBoxCache.get(state);
+        if (collisionBoxes == null) {
+            collisionBoxes = structureDefinition.getCollisionBoxes(state);
+            collisionBoxCache.put(state, collisionBoxes);
+        }
+        return collisionBoxes;
     }
 
     public StructureDefinition getStructureDefinition() {

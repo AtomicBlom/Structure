@@ -56,6 +56,7 @@ public class HighlightBoundingBoxDebug {
         }
         if (block instanceof StructureBlock) {
             highlightBoundingBoxes(targetBlockPos, player, partialTicks, 0.0F, 0.0F, 1.0F, 0.4F);
+            highlightCollisionBoxes(blockState, targetBlockPos, player, partialTicks, 1.0F, 0.0F, 0.0F, 0.4F);
         }
         if (block instanceof StructureShapeBlock) {
             highlightCollisionBoxes(blockState, targetBlockPos, player, partialTicks, 1.0F, 0.0F, 0.0F, 0.4F);

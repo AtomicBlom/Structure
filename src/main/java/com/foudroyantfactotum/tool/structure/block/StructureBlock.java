@@ -251,8 +251,7 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
     @Override
     @Deprecated
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, @Nullable Entity entityIn, boolean p_185477_7_) {
-        final StructureDefinition pattern = structureDefinitionProvider.getStructureDefinition();
-        final float[][] collisionBoxes = pattern.getCollisionBoxes();
+        final List<float[]> collisionBoxes = structureDefinitionProvider.getCollisionBoxes(state);
         if (collisionBoxes != null)
         {
             localToGlobalCollisionBoxes(

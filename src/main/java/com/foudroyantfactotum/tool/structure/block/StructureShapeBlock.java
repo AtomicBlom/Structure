@@ -243,7 +243,8 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
             }
 
             StructureDefinition pattern = sb.getStructureDefinitionProvider().getStructureDefinition();
-            float[][] collisionBoxes = pattern.getCollisionBoxes();
+            //FIXME: GetActualState?
+            List<float[]> collisionBoxes = pattern.getCollisionBoxes(world.getBlockState(mloc));
             if (sb == null || collisionBoxes == null)
             {
                 return;

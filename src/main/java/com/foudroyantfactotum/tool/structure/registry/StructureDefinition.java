@@ -18,10 +18,12 @@ package com.foudroyantfactotum.tool.structure.registry;
 import com.google.common.base.MoreObjects;
 import com.foudroyantfactotum.tool.structure.block.StructureBlock;
 import com.foudroyantfactotum.tool.structure.block.StructureShapeBlock;
+import com.foudroyantfactotum.tool.structure.utility.CollisionBoxRule;
 import com.google.common.base.Objects;
 import com.foudroyantfactotum.tool.structure.IStructure.IPartBlockState;
 import com.foudroyantfactotum.tool.structure.coordinates.BlockPosUtil;
 import com.foudroyantfactotum.tool.structure.coordinates.StructureIterable;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.util.EnumFacing;
@@ -29,6 +31,8 @@ import net.minecraft.util.EnumFacing;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Structures contain two states. Construction & Form state C->F, F->C.
@@ -72,7 +76,7 @@ public class StructureDefinition
     private BlockPos toolFormPosition;
 
     private IPartBlockState[][][] blocks;
-    private float[][] collisionBoxes;
+    private List<CollisionBoxRule> collisionBoxes;
     private StructureShapeBlock shapeBlock;
     private StructureBlock masterBlock;
 
@@ -87,7 +91,7 @@ public class StructureDefinition
                                BlockPos toolFormPosition,
 
                                IPartBlockState[][][] blocks,
-                               float[][] collisionBoxes,
+                               List<CollisionBoxRule> collisionBoxes,
                                StructureBlock masterBlock,
                                StructureShapeBlock shapeBlock)
     {
@@ -159,26 +163,22 @@ public class StructureDefinition
 
     public Iterable<MutableBlockPos> getStructureItr()
     {
-        return new Iterable<MutableBlockPos>()
-        {
-            @Override
-            public Iterator<MutableBlockPos> iterator()
-            {
-                return new StructureIterable(
-                        -masterPosition.getX(),
-                        -masterPosition.getY(),
-                        -masterPosition.getZ(),
-                        blocks.length - masterPosition.getX(),
-                        blocks[0].length - masterPosition.getY(),
-                        blocks[0][0].length - masterPosition.getZ()
-                );
-            }
-        };
+        return () -> new StructureIterable(
+                -masterPosition.getX(),
+                -masterPosition.getY(),
+                -masterPosition.getZ(),
+                blocks.length - masterPosition.getX(),
+                blocks[0].length - masterPosition.getY(),
+                blocks[0][0].length - masterPosition.getZ()
+        );
     }
 
-    public float[][] getCollisionBoxes()
+    public List<float[]> getCollisionBoxes(IBlockState state)
     {
-        return collisionBoxes;
+        return collisionBoxes.stream()
+                .filter((rule) -> rule.matches(state))
+                .flatMap((rule) -> Arrays.stream(rule.getCollisionBoxes()))
+                .collect(Collectors.toList());
     }
 
     public StructureBlock getMasterBlock() {
@@ -192,7 +192,6 @@ public class StructureDefinition
     public String toString(){
         return MoreObjects.toStringHelper(this)
                 .add("blocks", Arrays.toString(blocks))
-                .add("collisionBoxes", Arrays.toString(collisionBoxes))
                 .add("masterPosition", masterPosition)
                 .add("toolFormPosition", toolFormPosition)
                 .add("sbLayoutSize", sbLayoutSize)
