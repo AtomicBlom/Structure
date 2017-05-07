@@ -136,7 +136,7 @@ public final class TransformLAG
         if (ismirrored)
         {
             lx *= -1;
-            if (strucSize.getX() % 2 == 0) ++lx;
+            //if (strucSize.getX() % 2 == 0) ++lx;
         }
 
         final int rx = rotationMatrix[rotIndex][0][0] * lx + rotationMatrix[rotIndex][0][1] * lz;

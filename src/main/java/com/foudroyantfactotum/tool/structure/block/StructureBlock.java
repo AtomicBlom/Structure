@@ -452,16 +452,6 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
             shapeState = shapeState.withProperty(MIRROR, mirror);
         }
 
-        MutableBlockPos inverseTransform = new MutableBlockPos();
-
-        TransformLAG.mutLocalToGlobal(inverseTransform, BlockPos.ORIGIN, orientation, mirror, structureDefinition.getBlockBounds());
-
-        BlockPos origin = masterBlockLocation.add(
-                -inverseTransform.getX(),
-                -inverseTransform.getY(),
-                -inverseTransform.getZ()
-        );
-
         for (final MutableBlockPos local : structureDefinition.getStructureItr())
         {
             if (!structureDefinition.hasBlockAt(local))
@@ -469,7 +459,7 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
                 continue;
             }
 
-            final BlockPos blockCoord = bindLocalToGlobal(origin, local, orientation, mirror, structureDefinition.getBlockBounds());
+            final BlockPos blockCoord = bindLocalToGlobal(masterBlockLocation, local, orientation, mirror, structureDefinition.getBlockBounds());
 
             world.spawnParticle(
                     EnumParticleTypes.EXPLOSION_NORMAL,

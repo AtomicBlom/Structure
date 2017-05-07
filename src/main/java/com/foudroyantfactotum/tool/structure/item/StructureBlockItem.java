@@ -80,7 +80,7 @@ public class StructureBlockItem extends ItemBlock
             }
         }
 
-        world.setBlockState(origin, newState, 0x2);
+        world.setBlockState(pos, newState, 0x2);
         structureBlock.onBlockPlacedBy(world, origin, newState, player, stack);
 
         return true;
