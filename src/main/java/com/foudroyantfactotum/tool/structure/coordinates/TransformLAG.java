@@ -24,6 +24,7 @@ import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
 import com.foudroyantfactotum.tool.structure.tileentity.StructureTE;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
@@ -34,6 +35,7 @@ import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.oredict.OreDictionary;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.foudroyantfactotum.tool.structure.coordinates.BlockPosUtil.mutSetX;
@@ -136,7 +138,7 @@ public final class TransformLAG
         if (ismirrored)
         {
             lx *= -1;
-            if (strucSize.getX() % 2 == 0) ++lx;
+            //if (strucSize.getX() % 2 == 0) ++lx;
         }
 
         final int rx = rotationMatrix[rotIndex][0][0] * lx + rotationMatrix[rotIndex][0][1] * lz;
@@ -277,12 +279,16 @@ public final class TransformLAG
     }
 
     //collision boxes
-    public static void localToGlobalCollisionBoxes(
+    public static List<AxisAlignedBB> localToGlobalCollisionBoxes(
             BlockPos pos,
             int offsetX, int offsetY, int offsetZ,
-            AxisAlignedBB aabb, List<AxisAlignedBB> boundingBoxList, float[][] collB,
+            @Nullable AxisAlignedBB aabb, @Nullable List<AxisAlignedBB> boundingBoxList, List<float[]> collB,
             EnumFacing orientation, boolean mirror)
     {
+        if (boundingBoxList == null) {
+            boundingBoxList = Lists.newArrayList();
+        }
+
         int x = pos.getX();
         int y = pos.getY();
         int z = pos.getZ();
@@ -331,11 +337,12 @@ public final class TransformLAG
             bb.maxY = y + f[4] + offsetY;
             bb.maxZ = z + max(c1z, c2z) + tz + offsetZ;
 
-            if (bb.intersectsWith(aabb))
+            if (aabb == null || bb.intersectsWith(aabb))
             {
                 boundingBoxList.add(bb.getAxisAlignedBB());
             }
         }
+        return boundingBoxList;
     }
 
     //Bounding box

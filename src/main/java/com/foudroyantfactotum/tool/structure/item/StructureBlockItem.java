@@ -16,6 +16,9 @@
 package com.foudroyantfactotum.tool.structure.item;
 
 import com.foudroyantfactotum.tool.structure.block.StructureBlock;
+import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
+import com.foudroyantfactotum.tool.structure.utility.StructureQuery;
+import com.google.common.base.Preconditions;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
@@ -25,7 +28,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 import static com.foudroyantfactotum.tool.structure.coordinates.TransformLAG.localToGlobal;
@@ -41,38 +43,36 @@ public class StructureBlockItem extends ItemBlock
     @Override
     public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState)
     {
-        final StructureBlock block = (StructureBlock) this.block;
-
-        if (player == null)
-        {
-            return false;
-        }
+        Preconditions.checkNotNull(player);
+        final StructureBlock structureBlock = (StructureBlock)block;
+        newState = getInitialStateForSubItems(stack, newState);
 
         final EnumFacing orientation = newState.getValue(BlockHorizontal.FACING);
         boolean mirror = false;
-        if (block.canMirror()) {
+        if (structureBlock.canMirror()) {
             mirror = newState.getValue(StructureBlock.MIRROR);
         }
 
         //find master block location
-        final BlockPos hSize = block.getPattern().getHalfBlockBounds();
-        final BlockPos ml = block.getPattern().getMasterLocation();
+        final StructureDefinition structureDefinition = structureBlock.getStructureDefinitionProvider().getStructureDefinition();
+        final BlockPos hSize = structureDefinition.getHalfBlockBounds();
+        final BlockPos ml = structureDefinition.getMasterLocation();
 
         final BlockPos origin
                 = localToGlobal(
                 -hSize.getX() + ml.getX(), ml.getY(), -hSize.getZ() + ml.getZ(),
                 pos.getX(), pos.getY(), pos.getZ(),
-                orientation, mirror, block.getPattern().getBlockBounds());
+                orientation, mirror, structureDefinition.getBlockBounds());
 
         //check block locations
-        for (final MutableBlockPos local : block.getPattern().getStructureItr())
+        for (final MutableBlockPos local : structureDefinition.getStructureItr())
         {
-            if (!block.getPattern().hasBlockAt(local))
+            if (!structureDefinition.hasBlockAt(local))
             {
                 continue;
             }
 
-            mutLocalToGlobal(local, origin, orientation, mirror, block.getPattern().getBlockBounds());
+            mutLocalToGlobal(local, origin, orientation, mirror, structureDefinition.getBlockBounds());
 
             if (!world.getBlockState(local).getBlock().isReplaceable(world, local))
             {
@@ -80,9 +80,14 @@ public class StructureBlockItem extends ItemBlock
             }
         }
 
-        world.setBlockState(origin, newState, 0x2);
-        block.onBlockPlacedBy(world, origin, newState, player, stack);
+        world.setBlockState(pos, newState, 0x2);
+        structureBlock.onBlockPlacedBy(world, origin, newState, player, stack);
 
         return true;
+    }
+
+    protected IBlockState getInitialStateForSubItems(ItemStack stack, IBlockState newState)
+    {
+        return newState;
     }
 }

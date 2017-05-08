@@ -15,8 +15,7 @@
  */
 package com.foudroyantfactotum.tool.structure.IStructure;
 
-import com.foudroyantfactotum.tool.structure.StructureRegistry;
-import com.foudroyantfactotum.tool.structure.block.StructureBlock;
+import com.foudroyantfactotum.tool.structure.utility.IStructureDefinitionProvider;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -29,7 +28,7 @@ public interface IStructureTE extends ITileEntity
 {
     default IBlockState getTransmutedBlock()
     {
-        final StructureBlock sb = StructureRegistry.getStructureBlock(getRegHash());
+        final IStructureDefinitionProvider sb = getStructureDefinitionProvider();
 
         if (sb != null)
         {
@@ -37,7 +36,7 @@ public interface IStructureTE extends ITileEntity
 
             if (state != null && state.getBlock() instanceof IStructureTE)
             {
-                final IBlockState block = sb.getPattern().getBlock(getLocal()).getBlockState();
+                final IBlockState block = sb.getStructureDefinition().getBlock(getLocal()).getBlockState();
 
                 return block == null ?
                         Blocks.AIR.getDefaultState() :
@@ -52,10 +51,9 @@ public interface IStructureTE extends ITileEntity
         return Blocks.AIR.getDefaultState();
     }
 
-    int getRegHash();
-    StructureBlock getMasterBlockInstance();
+    IStructureDefinitionProvider getStructureDefinitionProvider();
     BlockPos getMasterBlockLocation();
 
-    void configureBlock(BlockPos local, int registerHash);
+    void configureBlock(BlockPos local, IStructureDefinitionProvider structureDefinitionProvider);
     BlockPos getLocal();
 }
