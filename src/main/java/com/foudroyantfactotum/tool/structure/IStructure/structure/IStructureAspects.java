@@ -13,21 +13,17 @@
  * You should have received a copy of the GNU General Public License along with
  * this program; if not, see <http://www.gnu.org/licenses>.
  */
-package com.foudroyantfactotum.tool.structure.net;
+package com.foudroyantfactotum.tool.structure.IStructure.structure;
 
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.relauncher.Side;
+import com.foudroyantfactotum.tool.structure.utility.StructureDefinitionBuilder;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
-import javax.annotation.Nonnull;
-
-public final class StructureNetwork
+public interface IStructureAspects
 {
-    public static SimpleNetworkWrapper network;
-
-    public static void init(@Nonnull final SimpleNetworkWrapper network)
-    {
-        network.registerMessage(StructurePacket.Handler.class, StructurePacket.class, 1, Side.CLIENT);
-
-        StructureNetwork.network = network;
-    }
+    StructureDefinitionBuilder getStructureBuild();
+    boolean onStructureBlockActivated(World world, BlockPos pos, EntityPlayer player, EnumHand hand, BlockPos callPos, EnumFacing side, BlockPos local, float sx, float sy, float sz);
 }

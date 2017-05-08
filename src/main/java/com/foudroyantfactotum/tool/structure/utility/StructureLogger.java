@@ -15,24 +15,16 @@
  */
 package com.foudroyantfactotum.tool.structure.utility;
 
-import com.foudroyantfactotum.tool.structure.StructureException;
+import com.foudroyantfactotum.tool.structure.StructureRegistry;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 
 public class StructureLogger
 {
-    private static org.apache.logging.log4j.Logger logger;
+    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(StructureRegistry.getMOD_ID() + ".Structure");
 
     public static void info(final String format, final Object... args)
     {
-        if (logger == null) {
-            throw new StructureException("Structure attempted to log before the Mod ID has been set.");
-        }
         logger.log(Level.INFO, format, args);
-    }
-
-    public static void setModId(String modId)
-    {
-        logger = LogManager.getLogger(modId + ".Structure");
     }
 }

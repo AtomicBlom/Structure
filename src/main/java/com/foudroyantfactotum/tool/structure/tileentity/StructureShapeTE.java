@@ -16,10 +16,9 @@
 package com.foudroyantfactotum.tool.structure.tileentity;
 
 import com.foudroyantfactotum.tool.structure.IStructure.IStructureTE;
-import com.foudroyantfactotum.tool.structure.Structure;
+import com.foudroyantfactotum.tool.structure.StructureRegistry;
 import com.foudroyantfactotum.tool.structure.block.StructureBlock;
 import com.foudroyantfactotum.tool.structure.coordinates.BlockPosUtil;
-import com.foudroyantfactotum.tool.structure.utility.IStructureDefinitionProvider;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import net.minecraft.block.BlockHorizontal;
@@ -28,7 +27,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 
 import static com.foudroyantfactotum.tool.structure.block.StructureBlock.getMirror;
@@ -39,9 +37,9 @@ import static com.foudroyantfactotum.tool.structure.tileentity.StructureTE.BLOCK
 public class StructureShapeTE extends TileEntity implements IStructureTE
 {
     private BlockPos local = BlockPos.ORIGIN;
-    private IStructureDefinitionProvider structureDefinition;
+    private int definitionHash = -1;
 
-    private java.util.Optional<BlockPos> masterLocation = java.util.Optional.empty();
+    private Optional<BlockPos> masterLocation = Optional.absent();
     private Optional<StructureTE> originTE = Optional.absent();
     private boolean hasNotAttemptedAcquisitionOfOriginTE = true;
 
@@ -80,6 +78,17 @@ public class StructureShapeTE extends TileEntity implements IStructureTE
     //                 S T R U C T U R E   C O N F I G
     //================================================================
 
+    @Override
+    public int getRegHash()
+    {
+        return definitionHash;
+    }
+
+    @Override
+    public StructureBlock getMasterBlockInstance()
+    {
+        return StructureRegistry.getStructureBlock(definitionHash);
+    }
 
     @Override
     public BlockPos getMasterBlockLocation()
@@ -87,33 +96,28 @@ public class StructureShapeTE extends TileEntity implements IStructureTE
         if (!masterLocation.isPresent())
         {
             final IBlockState state = getWorld().getBlockState(pos);
-            final StructureBlock sb = structureDefinition.getStructureDefinition().getMasterBlock();
+            final StructureBlock sb = StructureRegistry.getStructureBlock(definitionHash);
 
             if (sb == null)
             {
                 return pos;
             }
 
-            masterLocation = java.util.Optional.of(localToGlobal(
+            masterLocation = Optional.of(localToGlobal(
                     -local.getX(), -local.getY(), -local.getZ(),
                     pos.getX(), pos.getY(), pos.getZ(),
                     state.getValue(BlockHorizontal.FACING), getMirror(state),
-                    sb.getStructureDefinitionProvider().getStructureDefinition().getBlockBounds()));
+                    sb.getPattern().getBlockBounds()));
         }
 
         return masterLocation.get();
     }
 
-    public IStructureDefinitionProvider getStructureDefinitionProvider()
-    {
-        return structureDefinition;
-    }
-
     @Override
-    public void configureBlock(BlockPos local, IStructureDefinitionProvider structureDefinition)
+    public void configureBlock(BlockPos local, int definitionHash)
     {
         this.local = local;
-        this.structureDefinition = structureDefinition;
+        this.definitionHash = definitionHash;
     }
 
     @Override
@@ -153,8 +157,7 @@ public class StructureShapeTE extends TileEntity implements IStructureTE
         final int blockInfo = nbt.getInteger(BLOCK_INFO);
 
         local = BlockPosUtil.fromInt(blockInfo);
-        String definitionName = nbt.getString(BLOCK_PATTERN_NAME);
-        structureDefinition = Structure.getStructureDefinitionByRegistryName(new ResourceLocation(definitionName));
+        definitionHash = nbt.getInteger(BLOCK_PATTERN_NAME);
     }
 
     @Override
@@ -163,7 +166,7 @@ public class StructureShapeTE extends TileEntity implements IStructureTE
         super.writeToNBT(nbt);
 
         nbt.setInteger(BLOCK_INFO, BlockPosUtil.toInt(local));
-        nbt.setString(BLOCK_PATTERN_NAME, structureDefinition.getRegistryName().toString());
+        nbt.setInteger(BLOCK_PATTERN_NAME, definitionHash);
 
         return nbt;
     }
@@ -177,7 +180,7 @@ public class StructureShapeTE extends TileEntity implements IStructureTE
     {
         return Objects.toStringHelper(this)
                 .add("local", local)
-                .add("structureRegistryName", structureDefinition != null ? structureDefinition.getRegistryName() : null)
+                .add("definitionHash", definitionHash)
                 .add("masterLocation", masterLocation)
                 .add("originTE", originTE)
                 .add("hasNotAttemptedAcquisitionOfOriginTE", hasNotAttemptedAcquisitionOfOriginTE)

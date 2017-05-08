@@ -16,13 +16,10 @@
 package com.foudroyantfactotum.tool.structure.utility;
 
 import com.foudroyantfactotum.tool.structure.IStructure.IPartBlockState;
-import com.foudroyantfactotum.tool.structure.block.StructureBlock;
-import com.foudroyantfactotum.tool.structure.block.StructureShapeBlock;
 import com.foudroyantfactotum.tool.structure.coordinates.BlockPosUtil;
 import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
-import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -30,8 +27,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
 
 import java.util.BitSet;
-import java.util.List;
-import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -44,21 +39,10 @@ public final class StructureDefinitionBuilder
     private BlockPos toolFormPosition;
 
     private IPartBlockState[][][] states;
-    private List<CollisionBoxRule> collisionBoxes = Lists.newArrayList();
-    private List<CollisionBoxRule> selectionBoxRules = Lists.newArrayList();
-    private StructureBlock masterBlock;
-    private StructureShapeBlock shapeBlock;
+    private float[][] collisionBoxes;
 
     public StructureDefinition build()
     {
-        if (masterBlock == null) {
-            throw new StructureDefinitionError("Missing master block");
-        }
-
-        if (shapeBlock == null) {
-            throw new StructureDefinitionError("Missing shape block");
-        }
-
         if(conBlocks == null)
         {
             throw new StructureDefinitionError("Missing block states");
@@ -128,12 +112,11 @@ public final class StructureDefinitionBuilder
         }
 
         //correct collision bounds.
-        for (final CollisionBoxRule collisionBox : collisionBoxes)
+        for (float[] bb: collisionBoxes)
         {
-            collisionBox.adjustToMasterBlock(masterPosition);
-        }
-        for (final CollisionBoxRule selectionBox : selectionBoxRules) {
-            selectionBox.adjustToMasterBlock(masterPosition);
+            bb[0] -= masterPosition.getX(); bb[3] -= masterPosition.getX();
+            bb[1] -= masterPosition.getY(); bb[4] -= masterPosition.getY();
+            bb[2] -= masterPosition.getZ(); bb[5] -= masterPosition.getZ();
         }
 
         //correct tool form location
@@ -145,10 +128,7 @@ public final class StructureDefinitionBuilder
                 masterPosition,
                 toolFormPosition,
                 states,
-                collisionBoxes,
-                selectionBoxRules,
-                masterBlock,
-                shapeBlock);
+                collisionBoxes);
     }
 
     /**
@@ -330,41 +310,13 @@ public final class StructureDefinitionBuilder
         this.toolFormPosition = toolFormPosition;
     }
 
-    public void setCollisionBoxRule(Function<IBlockState, Boolean> condition, float[]... collisionBoxes) {
-        this.collisionBoxes.add(new CollisionBoxRule(condition, collisionBoxes));
-    }
-    public void setSelectionBoxRule(Function<IBlockState, Boolean> condition, float[] selectionBox) {
-        this.selectionBoxRules.add(new CollisionBoxRule(condition, selectionBox));
-    }
-
     /**
      * set collision boxes of structure
      * @param collisionBoxes arrays of collision. must have a length of 6 l=lower left back u=upper right front [lx, ly, lz, ux, uy, uz]
      */
     public void setCollisionBoxes(float[]... collisionBoxes)
     {
-        this.collisionBoxes.add(new CollisionBoxRule((blockState) -> true, collisionBoxes));
-    }
-    public void setSelectionBox(float[] selectionBox) {
-        this.selectionBoxRules.add(new CollisionBoxRule((blockState) -> true, selectionBox));
-    }
-
-    public void setMasterBlock(StructureBlock block)
-    {
-        this.masterBlock = block;
-    }
-
-    public StructureBlock getMasterBlock() {
-        return this.masterBlock;
-    }
-
-    public void setShapeBlock(StructureShapeBlock block)
-    {
-        this.shapeBlock = block;
-    }
-
-    public StructureShapeBlock getShapeBlock() {
-        return this.shapeBlock;
+        this.collisionBoxes = collisionBoxes;
     }
 
     public static class StructureDefinitionError extends Error
@@ -374,5 +326,4 @@ public final class StructureDefinitionBuilder
             super(msg);
         }
     }
-
 }

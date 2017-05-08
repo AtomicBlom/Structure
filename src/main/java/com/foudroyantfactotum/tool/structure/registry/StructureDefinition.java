@@ -15,20 +15,17 @@
  */
 package com.foudroyantfactotum.tool.structure.registry;
 
-import com.foudroyantfactotum.tool.structure.block.StructureBlock;
-import com.foudroyantfactotum.tool.structure.block.StructureShapeBlock;
-import com.foudroyantfactotum.tool.structure.utility.CollisionBoxRule;
 import com.google.common.base.Objects;
 import com.foudroyantfactotum.tool.structure.IStructure.IPartBlockState;
 import com.foudroyantfactotum.tool.structure.coordinates.BlockPosUtil;
 import com.foudroyantfactotum.tool.structure.coordinates.StructureIterable;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.util.EnumFacing;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Iterator;
 
 /**
  * Structures contain two states. Construction & Form state C->F, F->C.
@@ -72,10 +69,7 @@ public class StructureDefinition
     private BlockPos toolFormPosition;
 
     private IPartBlockState[][][] blocks;
-    private List<CollisionBoxRule> collisionBoxes;
-    private StructureShapeBlock shapeBlock;
-    private StructureBlock masterBlock;
-    private List<CollisionBoxRule> selectionBoxRules;
+    private float[][] collisionBoxes;
 
     private StructureDefinition()
     {
@@ -88,10 +82,7 @@ public class StructureDefinition
                                BlockPos toolFormPosition,
 
                                IPartBlockState[][][] blocks,
-                               List<CollisionBoxRule> collisionBoxes,
-                               List<CollisionBoxRule> selectionBoxRules,
-                               StructureBlock masterBlock,
-                               StructureShapeBlock shapeBlock)
+                               float[][] collisionBoxes)
     {
         this.sbLayout = sbLayout;
         this.sbLayoutSize = sbLayoutSize;
@@ -101,14 +92,11 @@ public class StructureDefinition
 
         this.blocks = blocks;
         this.collisionBoxes = collisionBoxes;
-        this.selectionBoxRules = selectionBoxRules;
 
         sbLayoutSizeHlf = BlockPosUtil.of(
                 sbLayoutSize.getX()/2,
                 sbLayoutSize.getY()/2,
                 sbLayoutSize.getZ()/2);
-        this.masterBlock = masterBlock;
-        this.shapeBlock = shapeBlock;
     }
 
     public boolean hasBlockAt(BlockPos loc, EnumFacing d) { return hasBlockAt(loc.getX() + d.getFrontOffsetX(), loc.getY() + d.getFrontOffsetY(), loc.getZ() + d.getFrontOffsetZ()); }
@@ -162,44 +150,27 @@ public class StructureDefinition
 
     public Iterable<MutableBlockPos> getStructureItr()
     {
-        return () -> new StructureIterable(
-                -masterPosition.getX(),
-                -masterPosition.getY(),
-                -masterPosition.getZ(),
-                blocks.length - masterPosition.getX(),
-                blocks[0].length - masterPosition.getY(),
-                blocks[0][0].length - masterPosition.getZ()
-        );
+        return new Iterable<MutableBlockPos>()
+        {
+            @Override
+            public Iterator<MutableBlockPos> iterator()
+            {
+                return new StructureIterable(
+                        -masterPosition.getX(),                -masterPosition.getY(),                   -masterPosition.getZ(),
+                        blocks.length - masterPosition.getX(), blocks[0].length - masterPosition.getY(), blocks[0][0].length - masterPosition.getZ());
+            }
+        };
     }
 
-    public List<float[]> getCollisionBoxes(IBlockState state)
+    public float[][] getCollisionBoxes()
     {
-        return collisionBoxes.stream()
-                .filter((rule) -> rule.matches(state))
-                .flatMap((rule) -> Arrays.stream(rule.getCollisionBoxes()))
-                .collect(Collectors.toList());
-    }
-
-    public float[] getSelectionBox(IBlockState state)
-    {
-        return selectionBoxRules.stream()
-                .filter((rule) -> rule.matches(state))
-                .findFirst()
-                .map(collisionBoxRule -> collisionBoxRule.getCollisionBoxes()[0])
-                .orElse(null);
-    }
-
-    public StructureBlock getMasterBlock() {
-        return masterBlock;
-    }
-
-    public StructureShapeBlock getShapeBlock() {
-        return shapeBlock;
+        return collisionBoxes;
     }
 
     public String toString(){
         return Objects.toStringHelper(this)
                 .add("blocks", Arrays.toString(blocks))
+                .add("collisionBoxes", Arrays.toString(collisionBoxes))
                 .add("masterPosition", masterPosition)
                 .add("toolFormPosition", toolFormPosition)
                 .add("sbLayoutSize", sbLayoutSize)

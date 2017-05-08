@@ -18,17 +18,15 @@ package com.foudroyantfactotum.tool.structure.block;
 import com.foudroyantfactotum.tool.structure.IStructure.ICanMirror;
 import com.foudroyantfactotum.tool.structure.IStructure.IStructureTE;
 import com.foudroyantfactotum.tool.structure.IStructure.structure.IPatternHolder;
+import com.foudroyantfactotum.tool.structure.IStructure.structure.IStructureAspects;
+import com.foudroyantfactotum.tool.structure.StructureRegistry;
 import com.foudroyantfactotum.tool.structure.coordinates.BlockPosUtil;
-import com.foudroyantfactotum.tool.structure.coordinates.TransformLAG;
 import com.foudroyantfactotum.tool.structure.net.StructureNetwork;
 import com.foudroyantfactotum.tool.structure.net.StructurePacket;
 import com.foudroyantfactotum.tool.structure.net.StructurePacketOption;
 import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
 import com.foudroyantfactotum.tool.structure.tileentity.StructureTE;
-import com.foudroyantfactotum.tool.structure.utility.IStructureDefinitionProvider;
-import com.foudroyantfactotum.tool.structure.utility.StructureLogger;
 import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.SoundType;
@@ -61,13 +59,14 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 
-import static com.foudroyantfactotum.tool.structure.block.StructureShapeBlock.EMPTY_BOUNDS;
 import static com.foudroyantfactotum.tool.structure.coordinates.TransformLAG.*;
 
 //@Optional.Interface(modid = WailaProvider.WAILA, iface = "mcp.mobius.waila.api.IWailaDataProvider", striprefs = true)
-public abstract class StructureBlock extends Block implements IStructureBlock, IPatternHolder, ICanMirror//, IWailaDataProvider
+public abstract class StructureBlock extends Block implements IPatternHolder, IStructureAspects, ICanMirror//, IWailaDataProvider
 {
-    private IStructureDefinitionProvider structureDefinitionProvider = null;
+    private int regHash = 0;
+    private StructureShapeBlock shapeBlock = null;
+    private StructureDefinition structureDefinition = null;
     private final boolean canMirror;
 
     public StructureBlock(Material material, boolean canMirror) {
@@ -91,6 +90,13 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
     public StructureBlock(boolean canMirror)
     {
         this(Material.PISTON, canMirror);
+    }
+
+    public void setStructureDefinition(StructureDefinition d, StructureShapeBlock b, int h)
+    {
+        regHash = h;
+        shapeBlock = b;
+        structureDefinition = d;
     }
 
     @Override
@@ -183,7 +189,7 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
     }
 
     @Override
-    public boolean isSideSolid(IBlockState baseState, IBlockAccess world, BlockPos pos, EnumFacing side)
+    public boolean isSideSolid(IBlockState base_state, IBlockAccess world, BlockPos pos, EnumFacing side)
     {
         return false;
     }
@@ -197,14 +203,14 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
         final boolean mirror = getMirror(state);
 
         formStructure(world, pos, state, 0x2);
-        updateExternalNeighbours(world, pos, structureDefinitionProvider, orientation, mirror, false);
+        updateExternalNeighbours(world, pos, getPattern(), orientation, mirror, false);
     }
 
     @Override
     @Deprecated
     public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos neighbourPos)
     {
-        onSharedNeighbourBlockChange(worldIn, pos, structureDefinitionProvider, blockIn, state);
+        onSharedNeighbourBlockChange(worldIn, pos, regHash, blockIn, state);
     }
 
     @Override
@@ -218,7 +224,7 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
         {
             boolean decompose = shouldDecompose() && (!isPlayerCreative || isPlayerSneaking);
             breakStructure(world, pos, te.getOrientation(), te.getMirror(), decompose);
-            updateExternalNeighbours(world, pos, structureDefinitionProvider, te.getOrientation(), te.getMirror(), false);
+            updateExternalNeighbours(world, pos, getPattern(), te.getOrientation(), te.getMirror(), false);
         } else
         {
             world.setBlockToAir(pos);
@@ -251,7 +257,8 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
     @Override
     @Deprecated
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, @Nullable Entity entityIn, boolean p_185477_7_) {
-        final List<float[]> collisionBoxes = structureDefinitionProvider.getCollisionBoxes(state);
+        StructureDefinition pattern = getPattern();
+        float[][] collisionBoxes = pattern.getCollisionBoxes();
         if (collisionBoxes != null)
         {
             localToGlobalCollisionBoxes(
@@ -261,29 +268,6 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
                     state.getValue(BlockHorizontal.FACING), getMirror(state)
             );
         }
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    @Deprecated
-    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World world, BlockPos pos)
-    {
-        final float[] selectionBox = structureDefinitionProvider.getSelectionBox(state);
-        if (selectionBox != null)
-        {
-            final List<AxisAlignedBB> axisAlignedBBS = localToGlobalCollisionBoxes(
-                    pos,
-                    0, 0, 0,
-                    null, null, Lists.newArrayList(selectionBox),
-                    state.getValue(BlockHorizontal.FACING), getMirror(state)
-            );
-            if (!axisAlignedBBS.isEmpty())
-            {
-                return axisAlignedBBS.get(0);
-            }
-        }
-        return EMPTY_BOUNDS;
-        //return world.getTileEntity(pos).getRenderBoundingBox();
     }
 
     @Override
@@ -314,27 +298,26 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
         {
             final StructureTE te = (StructureTE) ute;
 
-            final StructureDefinition structureDefinition = structureDefinitionProvider.getStructureDefinition();
-            for (final MutableBlockPos local : structureDefinition.getStructureItr())
+            for (MutableBlockPos local : getPattern().getStructureItr())
             {
                 //outward Vector
                 float xSpeed = 0.0f;
                 float ySpeed = 0.0f;
                 float zSpeed = 0.0f;
 
-                for (EnumFacing direction : EnumFacing.VALUES)
+                for (EnumFacing d : EnumFacing.VALUES)
                 {
-                    if (!structureDefinition.hasBlockAt(local, direction))
+                    if (!getPattern().hasBlockAt(local, d))
                     {
-                        direction = localToGlobal(direction, te.getOrientation(), te.getMirror());
+                        d = localToGlobal(d, te.getOrientation(), te.getMirror());
 
-                        xSpeed += direction.getFrontOffsetX();
-                        ySpeed += direction.getFrontOffsetY();
-                        zSpeed += direction.getFrontOffsetZ();
+                        xSpeed += d.getFrontOffsetX();
+                        ySpeed += d.getFrontOffsetY();
+                        zSpeed += d.getFrontOffsetZ();
                     }
                 }
 
-                mutLocalToGlobal(local, pos, te.getOrientation(), te.getMirror(), structureDefinition.getBlockBounds());
+                mutLocalToGlobal(local, pos, te.getOrientation(), te.getMirror(), getPattern().getBlockBounds());
 
                 spawnBreakParticle(world, te, local, xSpeed * scaleVec, ySpeed * scaleVec, zSpeed * scaleVec);
             }
@@ -354,6 +337,15 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
+    @Deprecated
+    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World world, BlockPos pos)
+    {
+        //return EMPTY_BOUNDS;
+        return world.getTileEntity(pos).getRenderBoundingBox();
+    }
+
+    @Override
     public boolean hasTileEntity(IBlockState state)
     {
         return true;
@@ -363,16 +355,6 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
     //=======================================================
     //       S t r u c t u r e   B l o c k   C o d e
     //=======================================================
-
-    @Override
-    public IStructureDefinitionProvider getStructureDefinitionProvider() {
-        return structureDefinitionProvider;
-    }
-
-    public void setStructureDefinitionProvider(IStructureDefinitionProvider structureDefinitionProvider)
-    {
-        this.structureDefinitionProvider = structureDefinitionProvider;
-    }
 
     public static final PropertyBool MIRROR = PropertyBool.create("mirror");
 
@@ -388,12 +370,23 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
     }
 
     @Override
+    public StructureDefinition getPattern()
+    {
+        return structureDefinition;
+    }
+
+    public int getRegHash()
+    {
+        return regHash;
+    }
+
+    @Override
     public boolean onStructureBlockActivated(World world, BlockPos pos, EntityPlayer player, EnumHand hand, BlockPos callPos, EnumFacing side, BlockPos local, float sx, float sy, float sz)
     {
         return false;
     }
 
-    public static void onSharedNeighbourBlockChange(IBlockAccess world, BlockPos pos, IStructureDefinitionProvider structure, Block neighbourBlock, IBlockState state)
+    public static void onSharedNeighbourBlockChange(IBlockAccess world, BlockPos pos, int hash, Block neighbourBlock, IBlockState state)
     {
         final TileEntity ute = world.getTileEntity(pos);
 
@@ -403,7 +396,7 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
         }
 
         final IStructureTE te = (IStructureTE) ute;
-        final StructureBlock sb = structure.getStructureDefinition().getMasterBlock();
+        final StructureBlock sb = StructureRegistry.getStructureBlock(te.getRegHash());
 
         if (sb == null)
         {
@@ -413,7 +406,7 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
 
         for (final EnumFacing f : EnumFacing.VALUES)
         {
-            if (!sb.structureDefinitionProvider.getStructureDefinition().hasBlockAt(te.getLocal(), f))
+            if (!sb.getPattern().hasBlockAt(te.getLocal(), f))
             {
                 continue;
             }
@@ -437,12 +430,13 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
             }
 
             //break as the above simple condition for structure test failed.
+
             ute.getWorld().setBlockState(pos, te.getTransmutedBlock(), 0x3);
 
             if (te.getLocal().equals(BlockPos.ORIGIN))
             {
                 StructureNetwork.network.sendToAllAround(
-                        new StructurePacket(pos, structure.getRegistryName(), orientation, mirror, StructurePacketOption.BOOM_PARTICLE),
+                        new StructurePacket(pos, hash, orientation, mirror, StructurePacketOption.BOOM_PARTICLE),
                         new NetworkRegistry.TargetPoint(ute.getWorld().provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 30)
                 );
             }
@@ -451,12 +445,11 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
         }
     }
 
-    public void formStructure(World world, BlockPos masterBlockLocation, IBlockState state, int flag)
+    public void formStructure(World world, BlockPos origin, IBlockState state, int flag)
     {
-        final StructureDefinition structureDefinition = structureDefinitionProvider.getStructureDefinition();
         final EnumFacing orientation = state.getValue(BlockHorizontal.FACING);
         final boolean mirror = getMirror(state);
-        IBlockState shapeState = structureDefinition.getShapeBlock()
+        IBlockState shapeState = shapeBlock
                 .getDefaultState()
                 .withProperty(BlockHorizontal.FACING, orientation);
 
@@ -465,24 +458,20 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
             shapeState = shapeState.withProperty(MIRROR, mirror);
         }
 
-        for (final MutableBlockPos local : structureDefinition.getStructureItr())
+        final StructureDefinition pattern = getPattern();
+        for (final MutableBlockPos local : pattern.getStructureItr())
         {
-            if (!structureDefinition.hasBlockAt(local))
+            if (!pattern.hasBlockAt(local))
             {
                 continue;
             }
 
-            final BlockPos blockCoord = bindLocalToGlobal(masterBlockLocation, local, orientation, mirror, structureDefinition.getBlockBounds());
+            final BlockPos blockCoord = bindLocalToGlobal(origin, local, orientation, mirror, pattern.getBlockBounds());
 
-            world.spawnParticle(
-                    EnumParticleTypes.EXPLOSION_NORMAL,
+            world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL,
                     blockCoord.getX() + 0.5f,
                     blockCoord.getY() + 0.5f,
-                    blockCoord.getZ() + 0.5f,
-                    (-0.5 + Math.random()) * 0.25f,
-                    0.05f,
-                    (-0.5 + Math.random()) * 0.2f
-            );
+                    blockCoord.getZ() + 0.5f, (-0.5 + Math.random()) * 0.25f, 0.05f, (-0.5 + Math.random()) * 0.2f);
 
             if (!local.equals(BlockPos.ORIGIN))
             {
@@ -493,11 +482,10 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
 
             if (ssBlock != null)
             {
-                ssBlock.configureBlock(new BlockPos(local), structureDefinitionProvider);
+                ssBlock.configureBlock(new BlockPos(local), regHash);
             } else
             {
                 world.setBlockToAir(blockCoord);
-                StructureLogger.info("Failed to create a structure, expected a TileEntity and got a dumb block instead.");
                 return;
             }
         }
@@ -505,13 +493,12 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
 
     public void breakStructure(World world, BlockPos origin, EnumFacing orientation, boolean mirror, boolean decompose)
     {
-        final StructureDefinition structureDefinition = structureDefinitionProvider.getStructureDefinition();
-        for (final MutableBlockPos local : structureDefinition.getStructureItr())
+        for (final MutableBlockPos local : getPattern().getStructureItr())
         {
-            if (structureDefinition.hasBlockAt(local))
+            if (getPattern().hasBlockAt(local))
             {
-                final IBlockState block = structureDefinition.getBlock(local).getBlockState();
-                mutLocalToGlobal(local, origin, orientation, mirror, structureDefinition.getBlockBounds());
+                final IBlockState block = getPattern().getBlock(local).getBlockState();
+                mutLocalToGlobal(local, origin, orientation, mirror, getPattern().getBlockBounds());
                 final IBlockState worldBlock = world.getBlockState(local);
 
                 if (worldBlock.getBlock() instanceof StructureBlock || worldBlock.getBlock() instanceof StructureShapeBlock)
@@ -527,9 +514,8 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
         }
     }
 
-    public static void updateExternalNeighbours(World world, BlockPos origin, IStructureDefinitionProvider sdp, EnumFacing orientation, boolean mirror, boolean notifyBlocks)
+    public static void updateExternalNeighbours(World world, BlockPos origin, StructureDefinition sd, EnumFacing orientation, boolean mirror, boolean notifyBlocks)
     {
-        StructureDefinition sd = sdp.getStructureDefinition();
         for (final MutableBlockPos local : sd.getStructureItr())
         {
             for (EnumFacing d : EnumFacing.VALUES)
@@ -615,7 +601,7 @@ public abstract class StructureBlock extends Block implements IStructureBlock, I
     public String toString()
     {
         return Objects.toStringHelper(this)
-                .add("Structure Definition", getStructureDefinitionProvider())
+                .add("Structure Definition", getPattern())
                 .toString();
     }
 }

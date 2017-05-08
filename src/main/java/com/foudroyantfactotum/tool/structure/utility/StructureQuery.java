@@ -17,7 +17,7 @@ public final class StructureQuery {
 
     public static boolean canPlaceStructure(StructureBlock block, World world, BlockPos pos, EnumFacing orientation, boolean mirror, @Nullable List<BlockPos.MutableBlockPos> badLocations) {
         //find master block location
-        StructureDefinition pattern = block.getStructureDefinitionProvider().getStructureDefinition();
+        StructureDefinition pattern = block.getPattern();
         final BlockPos hSize = pattern.getHalfBlockBounds();
         final BlockPos ml = pattern.getMasterLocation();
 

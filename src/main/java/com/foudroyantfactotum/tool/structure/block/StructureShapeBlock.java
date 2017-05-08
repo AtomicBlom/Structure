@@ -17,9 +17,9 @@ package com.foudroyantfactotum.tool.structure.block;
 
 import com.foudroyantfactotum.tool.structure.IStructure.ICanMirror;
 import com.foudroyantfactotum.tool.structure.IStructure.IStructureTE;
+import com.foudroyantfactotum.tool.structure.StructureRegistry;
 import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
 import com.foudroyantfactotum.tool.structure.tileentity.StructureShapeTE;
-import com.google.common.collect.Lists;
 import net.minecraft.block.*;
 import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.material.Material;
@@ -42,7 +42,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import scala.xml.dtd.EMPTY;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -132,12 +131,9 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
     {
         final StructureShapeTE te = (StructureShapeTE) world.getTileEntity(pos);
 
-        if (te != null)
+        if (te != null && te.getMasterBlockInstance() != null)
         {
-            if (te.getStructureDefinitionProvider().getStructureDefinition().getMasterBlock() != null)
-            {
-                return te.getStructureDefinitionProvider().getStructureDefinition().getMasterBlock().getPickBlock(state, target, world, pos, player);
-            }
+            return te.getMasterBlockInstance().getPickBlock(state, target, world, pos, player);
         }
 
         return ItemStack.EMPTY;
@@ -210,33 +206,16 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
     @Override
     @SideOnly(Side.CLIENT)
     @Deprecated
-    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World world, BlockPos pos)
+    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World worldIn, BlockPos pos)
     {
-        final IStructureTE te = (IStructureTE) world.getTileEntity(pos);
-
+        final StructureShapeTE te = (StructureShapeTE) worldIn.getTileEntity(pos);
         if (te != null)
         {
-            final BlockPos mloc = te.getMasterBlockLocation();
-            final StructureBlock sb = te.getStructureDefinitionProvider().getStructureDefinition().getMasterBlock();
+            final TileEntity te2 = worldIn.getTileEntity(te.getMasterBlockLocation());
 
-            StructureDefinition pattern = sb.getStructureDefinitionProvider().getStructureDefinition();
-            //FIXME: GetActualState?
-            float[] selectionBox = pattern.getSelectionBox(world.getBlockState(mloc));
-            if (sb == null || selectionBox == null)
+            if (te2 != null)
             {
-                return EMPTY_BOUNDS;
-            }
-
-            final List<AxisAlignedBB> axisAlignedBBS = localToGlobalCollisionBoxes(
-                    pos,
-                    mloc.getX() - pos.getX(), mloc.getY() - pos.getY(), mloc.getZ() - pos.getZ(),
-                    null, null, Lists.newArrayList(selectionBox),
-                    state.getValue(BlockHorizontal.FACING), getMirror(state)
-
-            );
-            if (!axisAlignedBBS.isEmpty())
-            {
-                return axisAlignedBBS.get(0);
+                return te2.getRenderBoundingBox();
             }
         }
 
@@ -252,11 +231,10 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
         if (te != null)
         {
             final BlockPos mloc = te.getMasterBlockLocation();
-            final StructureBlock sb = te.getStructureDefinitionProvider().getStructureDefinition().getMasterBlock();
+            final StructureBlock sb = StructureRegistry.getStructureBlock(te.getRegHash());
 
-            StructureDefinition pattern = sb.getStructureDefinitionProvider().getStructureDefinition();
-            //FIXME: GetActualState?
-            List<float[]> collisionBoxes = pattern.getCollisionBoxes(world.getBlockState(mloc));
+            StructureDefinition pattern = sb.getPattern();
+            float[][] collisionBoxes = pattern.getCollisionBoxes();
             if (sb == null || collisionBoxes == null)
             {
                 return;
@@ -299,7 +277,7 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
 
         if (te != null)
         {
-            final StructureBlock block = te.getStructureDefinitionProvider().getStructureDefinition().getMasterBlock();
+            final StructureBlock block = te.getMasterBlockInstance();
 
             if (block != null)
             {
@@ -317,7 +295,7 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
         final boolean isPlayerCreative = player != null && player.capabilities.isCreativeMode;
         final boolean isPlayerSneaking = player != null && player.isSneaking();
 
-        final StructureBlock sb = te.getStructureDefinitionProvider().getStructureDefinition().getMasterBlock();
+        final StructureBlock sb = StructureRegistry.getStructureBlock(te.getRegHash());
 
         if (sb != null)
         {
@@ -331,7 +309,7 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
             );
             updateExternalNeighbours(world,
                     te.getMasterBlockLocation(),
-                    sb.getStructureDefinitionProvider(),
+                    sb.getPattern(),
                     state.getValue(BlockHorizontal.FACING),
                     getMirror(state),
                     false
@@ -352,7 +330,7 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
 
         if (te != null)
         {
-            final StructureBlock block = te.getStructureDefinitionProvider().getStructureDefinition().getMasterBlock();
+            final StructureBlock block = te.getMasterBlockInstance();
 
             if (block != null)
             {
@@ -370,7 +348,7 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
     public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos neighbourPos)
     {
         onSharedNeighbourBlockChange(world, pos,
-                ((StructureShapeTE) world.getTileEntity(pos)).getStructureDefinitionProvider(),
+                ((StructureShapeTE) world.getTileEntity(pos)).getRegHash(),
                 blockIn,
                 state
         );

@@ -16,12 +16,11 @@
 package com.foudroyantfactotum.tool.structure.tileentity;
 
 import com.foudroyantfactotum.tool.structure.IStructure.IStructureTE;
-import com.foudroyantfactotum.tool.structure.Structure;
+import com.foudroyantfactotum.tool.structure.StructureRegistry;
 import com.foudroyantfactotum.tool.structure.block.StructureBlock;
 import com.foudroyantfactotum.tool.structure.coordinates.BlockPosUtil;
 import com.foudroyantfactotum.tool.structure.net.StructurePacket;
 import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
-import com.foudroyantfactotum.tool.structure.utility.IStructureDefinitionProvider;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import net.minecraft.block.BlockHorizontal;
@@ -31,7 +30,6 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
@@ -48,7 +46,7 @@ public class StructureTE extends TileEntity implements IStructureTE
     static final String BLOCK_PATTERN_NAME = "blockPatternHash";
 
     private BlockPos local = BlockPos.ORIGIN;
-    private IStructureDefinitionProvider structureDefinitionProvider;
+    private int definitionHash = -1;
 
     protected EnumFacing orientation = EnumFacing.NORTH;
     protected boolean mirror = false;
@@ -60,14 +58,12 @@ public class StructureTE extends TileEntity implements IStructureTE
         //noop
     }
 
-    public StructureTE(IStructureDefinitionProvider structureDefinitionProvider, EnumFacing orientation, boolean mirror)
+    public StructureTE(StructureDefinition sd, EnumFacing orientation, boolean mirror)
     {
         this.orientation = orientation;
         this.mirror = mirror;
-        this.structureDefinitionProvider = structureDefinitionProvider;
 
-
-        transformDirectionsOnLoad(structureDefinitionProvider.getStructureDefinition());
+        transformDirectionsOnLoad(sd);
     }
 
     //================================================================
@@ -75,20 +71,27 @@ public class StructureTE extends TileEntity implements IStructureTE
     //================================================================
 
     @Override
+    public StructureBlock getMasterBlockInstance()
+    {
+        return StructureRegistry.getStructureBlock(definitionHash);
+    }
+
+    @Override
     public BlockPos getMasterBlockLocation()
     {
         return pos;
     }
 
-    public IStructureDefinitionProvider getStructureDefinitionProvider()
+    @Override
+    public int getRegHash()
     {
-        return structureDefinitionProvider;
+        return definitionHash;
     }
 
     @Override
-    public void configureBlock(BlockPos local, IStructureDefinitionProvider structureDefinition)
+    public void configureBlock(BlockPos local, int registerHash)
     {
-        this.structureDefinitionProvider = structureDefinition;
+        this.definitionHash = registerHash;
     }
 
     @Override
@@ -137,13 +140,12 @@ public class StructureTE extends TileEntity implements IStructureTE
 
         final int blockInfo = nbt.getInteger(BLOCK_INFO);
 
-        String definitionName = nbt.getString(BLOCK_PATTERN_NAME);
-        structureDefinitionProvider = Structure.getStructureDefinitionByRegistryName(new ResourceLocation(definitionName));
+        definitionHash = nbt.getInteger(BLOCK_PATTERN_NAME);
 
         orientation = EnumFacing.VALUES[blockInfo >> BlockPosUtil.BLOCKPOS_BITLEN & 0x7];
         mirror = (blockInfo >> BlockPosUtil.BLOCKPOS_BITLEN & StructurePacket.flagMirrored) != 0;
 
-        transformDirectionsOnLoad(structureDefinitionProvider.getStructureDefinition());
+        transformDirectionsOnLoad(getMasterBlockInstance().getPattern());
     }
 
     @Override
@@ -152,7 +154,7 @@ public class StructureTE extends TileEntity implements IStructureTE
         super.writeToNBT(nbt);
 
         nbt.setInteger(BLOCK_INFO, local.hashCode() | (orientation.ordinal() | (mirror ? StructurePacket.flagMirrored:0)) << BlockPosUtil.BLOCKPOS_BITLEN);
-        nbt.setString(BLOCK_PATTERN_NAME, structureDefinitionProvider.getRegistryName().toString());
+        nbt.setInteger(BLOCK_PATTERN_NAME, definitionHash);
 
         return nbt;
     }
@@ -169,8 +171,7 @@ public class StructureTE extends TileEntity implements IStructureTE
     {
         if (!renderBounds.isPresent())
         {
-            final StructureDefinition structureDefinition = structureDefinitionProvider.getStructureDefinition();
-            final StructureBlock sb = structureDefinition.getMasterBlock();
+            final StructureBlock sb = getMasterBlockInstance();
 
             if (sb == null)
             {
@@ -181,7 +182,7 @@ public class StructureTE extends TileEntity implements IStructureTE
             final EnumFacing orientation = state.getValue(BlockHorizontal.FACING);
             final boolean mirror = StructureBlock.getMirror(state);
 
-            renderBounds = Optional.of(localToGlobalBoundingBox(pos, local, structureDefinition, orientation, mirror));
+            renderBounds = Optional.of(localToGlobalBoundingBox(pos, local, sb.getPattern(), orientation, mirror));
         }
 
         return renderBounds.get();
@@ -202,7 +203,7 @@ public class StructureTE extends TileEntity implements IStructureTE
         return Objects.toStringHelper(this)
                 .add("local", local)
                 .add("renderBounds", renderBounds)
-                .add("structureRegistryName", structureDefinitionProvider.getRegistryName())
+                .add("blockPatternHash", definitionHash)
                 .add("mirror", mirror)
                 .add("orientation", orientation)
                 .toString();
