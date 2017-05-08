@@ -20,6 +20,7 @@ import com.foudroyantfactotum.tool.structure.IStructure.IStructureTE;
 import com.foudroyantfactotum.tool.structure.StructureRegistry;
 import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
 import com.foudroyantfactotum.tool.structure.tileentity.StructureShapeTE;
+import com.foudroyantfactotum.tool.structure.utility.StructureLogger;
 import net.minecraft.block.*;
 import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.material.Material;
@@ -233,7 +234,13 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
             final BlockPos mloc = te.getMasterBlockLocation();
             final StructureBlock sb = StructureRegistry.getStructureBlock(te.getRegHash());
 
+            if (sb == null) {
+                StructureLogger.info("Attempt to get collision boxes before the Tile Entity is ready.");
+                return;
+            }
+
             StructureDefinition pattern = sb.getPattern();
+
             float[][] collisionBoxes = pattern.getCollisionBoxes();
             if (sb == null || collisionBoxes == null)
             {

@@ -90,7 +90,7 @@ public class StructurePacket implements IMessage
         @Override
         public IMessage onMessage(StructurePacket msg, MessageContext ctx)
         {
-            final World world = ctx.getServerHandler().playerEntity.world;
+            final World world = ctx.getServerHandler().playerEntity.worldObj;
             final StructureBlock block = StructureRegistry.getStructureBlock(msg.structureHash);
 
             if (block == null)
