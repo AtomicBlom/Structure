@@ -20,7 +20,6 @@ import com.foudroyantfactotum.tool.structure.block.StructureBlock;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
@@ -91,7 +90,7 @@ public class StructurePacket implements IMessage
         @Override
         public IMessage onMessage(StructurePacket msg, MessageContext ctx)
         {
-            final World world = Minecraft.getMinecraft().theWorld;
+            final World world = ctx.getServerHandler().playerEntity.world;
             final StructureBlock block = StructureRegistry.getStructureBlock(msg.structureHash);
 
             if (block == null)
