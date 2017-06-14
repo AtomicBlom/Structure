@@ -149,9 +149,10 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
     {
         final StructureShapeTE te = (StructureShapeTE) world.getTileEntity(pos);
 
-        if (te != null && te.getMasterBlockInstance() != null)
+        if (te != null && te.hasOriginTE())
         {
-            te.getMasterBlockInstance().onBlockExploded(world, te.getMasterBlockLocation(), explosion);
+            final Block masterBlock = world.getBlockState(te.getMasterBlockLocation()).getBlock();
+            masterBlock.onBlockExploded(world, te.getMasterBlockLocation(), explosion);
         }
         super.onBlockExploded(world, pos, explosion);
     }

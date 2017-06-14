@@ -57,7 +57,7 @@ public abstract class StructureDefinitionProviderBase implements IStructureDefin
     }
 
     @Override
-    public Class<? super IStructureDefinitionProvider> getRegistryType()
+    public Class<IStructureDefinitionProvider> getRegistryType()
     {
         return IStructureDefinitionProvider.class;
     }

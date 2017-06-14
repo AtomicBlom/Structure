@@ -73,7 +73,7 @@ public class HighlightBoundingBoxDebug {
         GlStateManager.disableTexture2D();
         GlStateManager.depthMask(false);
         GlStateManager.glLineWidth(2.0F);
-        RenderGlobal.drawSelectionBoundingBox(new AxisAlignedBB(blockPos).expandXyz(0.0021D).offset(-x, -y, -z), red, green, blue, alpha);
+        RenderGlobal.drawSelectionBoundingBox(new AxisAlignedBB(blockPos).grow(0.0021D).offset(-x, -y, -z), red, green, blue, alpha);
         GlStateManager.depthMask(true);
         GlStateManager.enableTexture2D();
         GlStateManager.disableBlend();
@@ -105,7 +105,7 @@ public class HighlightBoundingBoxDebug {
 
         GlStateManager.glLineWidth(1.0F);
         for (final AxisAlignedBB collisionBox : collisionBoxes) {
-            RenderGlobal.drawSelectionBoundingBox(collisionBox.expandXyz(0.0021D).offset(-x, -y, -z), red, green, blue, alpha);
+            RenderGlobal.drawSelectionBoundingBox(collisionBox.grow(0.0021D).offset(-x, -y, -z), red, green, blue, alpha);
         }
 
         GlStateManager.depthMask(true);
