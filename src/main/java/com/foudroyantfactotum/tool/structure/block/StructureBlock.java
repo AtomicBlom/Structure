@@ -26,6 +26,7 @@ import com.foudroyantfactotum.tool.structure.net.StructurePacket;
 import com.foudroyantfactotum.tool.structure.net.StructurePacketOption;
 import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
 import com.foudroyantfactotum.tool.structure.tileentity.StructureTE;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
@@ -189,6 +190,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
     }
 
     @Override
+    @Deprecated
     public boolean isSideSolid(IBlockState base_state, IBlockAccess world, BlockPos pos, EnumFacing side)
     {
         return false;
@@ -600,7 +602,7 @@ public abstract class StructureBlock extends Block implements IPatternHolder, IS
     @Override
     public String toString()
     {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("Structure Definition", getPattern())
                 .toString();
     }

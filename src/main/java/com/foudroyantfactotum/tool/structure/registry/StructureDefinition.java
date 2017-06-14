@@ -15,6 +15,7 @@
  */
 package com.foudroyantfactotum.tool.structure.registry;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.foudroyantfactotum.tool.structure.IStructure.IPartBlockState;
 import com.foudroyantfactotum.tool.structure.coordinates.BlockPosUtil;
@@ -168,7 +169,7 @@ public class StructureDefinition
     }
 
     public String toString(){
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("blocks", Arrays.toString(blocks))
                 .add("collisionBoxes", Arrays.toString(collisionBoxes))
                 .add("masterPosition", masterPosition)

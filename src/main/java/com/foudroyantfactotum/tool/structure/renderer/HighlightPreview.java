@@ -8,7 +8,7 @@ import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureMap;
@@ -87,7 +87,7 @@ public class HighlightPreview {
         {
             List<BlockPos.MutableBlockPos> badLocations = Lists.newArrayList();
 
-            IBlockState blockState = structureBlock.getStateForPlacement(world, potentialPlaceLocation, target.sideHit, (float)target.hitVec.xCoord, (float)target.hitVec.yCoord, (float)target.hitVec.zCoord, heldItem.getMetadata(), player, EnumHand.MAIN_HAND);
+            IBlockState blockState = structureBlock.getStateForPlacement(world, potentialPlaceLocation, target.sideHit, (float)target.hitVec.x, (float)target.hitVec.y, (float)target.hitVec.z, heldItem.getMetadata(), player, EnumHand.MAIN_HAND);
             final EnumFacing orientation = blockState.getValue(BlockHorizontal.FACING);
             boolean mirror = false;
             if (structureBlock.canMirror()) {
@@ -135,7 +135,7 @@ public class HighlightPreview {
         GlStateManager.depthMask(false);
 
         for (BlockPos badLocation : badLocations) {
-            RenderGlobal.drawSelectionBoundingBox(new AxisAlignedBB(badLocation).expandXyz(0.0020000000949949026D).offset(-x, -y, -z), 1.0F, 0.0F, 0.0F, 0.4F);
+            RenderGlobal.drawSelectionBoundingBox(new AxisAlignedBB(badLocation).grow(0.0020000000949949026D).offset(-x, -y, -z), 1.0F, 0.0F, 0.0F, 0.4F);
         }
 
         GlStateManager.depthMask(true);
@@ -147,10 +147,10 @@ public class HighlightPreview {
         Minecraft.getMinecraft().renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
-        VertexBuffer vertexBuffer = new ReusableVertexBuffer(2097152);
-        renderModelToVertexBuffer(vertexBuffer, state, model, canPlace);
+        BufferBuilder bufferBuilder = new ReusableBufferBuilder(2097152);
+        renderModelToBufferBuilder(bufferBuilder, state, model, canPlace);
 
-        WorldVertexBufferUploader worldVertexBufferUploader = new WorldVertexBufferUploader();
+        WorldVertexBufferUploader worldBufferBuilderUploader = new WorldVertexBufferUploader();
 
         GlStateManager.enableCull();
         GlStateManager.enableBlend();
@@ -161,11 +161,11 @@ public class HighlightPreview {
         GlStateManager.depthFunc(GL11.GL_LEQUAL);
         GlStateManager.colorMask(false, false, false, false);
 
-        worldVertexBufferUploader.draw(vertexBuffer);
+        worldBufferBuilderUploader.draw(bufferBuilder);
 
         GlStateManager.depthFunc(GL11.GL_EQUAL);
         GlStateManager.colorMask(true, true, true, true);
-        worldVertexBufferUploader.draw(vertexBuffer);
+        worldBufferBuilderUploader.draw(bufferBuilder);
 
         GlStateManager.disableCull();
         GlStateManager.depthFunc(GL11.GL_LEQUAL);
@@ -173,16 +173,16 @@ public class HighlightPreview {
         GlStateManager.disableAlpha();
     }
 
-    private static void renderModelToVertexBuffer(VertexBuffer vertexBuffer, IBlockState state, IBakedModel model, boolean canPlace) {
-        vertexBuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
+    private static void renderModelToBufferBuilder(BufferBuilder bufferBuilder, IBlockState state, IBakedModel model, boolean canPlace) {
+        bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
 
         int color = (0x80000000 | (canPlace ? 0xFFFFFF : 0xFF5555));
         for (EnumFacing value : modelSources) {
             for (BakedQuad quad : model.getQuads(state, value, 0)) {
-                LightUtil.renderQuadColor(vertexBuffer, quad, color);
+                LightUtil.renderQuadColor(bufferBuilder, quad, color);
             }
         }
-        vertexBuffer.finishDrawing();
+        bufferBuilder.finishDrawing();
     }
 
 }

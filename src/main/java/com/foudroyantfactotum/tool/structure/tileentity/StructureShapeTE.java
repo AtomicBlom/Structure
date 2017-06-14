@@ -19,6 +19,7 @@ import com.foudroyantfactotum.tool.structure.IStructure.IStructureTE;
 import com.foudroyantfactotum.tool.structure.StructureRegistry;
 import com.foudroyantfactotum.tool.structure.block.StructureBlock;
 import com.foudroyantfactotum.tool.structure.coordinates.BlockPosUtil;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import net.minecraft.block.BlockHorizontal;
@@ -178,7 +179,7 @@ public class StructureShapeTE extends TileEntity implements IStructureTE
     @Override
     public String toString()
     {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("local", local)
                 .add("definitionHash", definitionHash)
                 .add("masterLocation", masterLocation)
