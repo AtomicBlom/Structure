@@ -17,7 +17,6 @@ package com.foudroyantfactotum.tool.structure.item;
 
 import com.foudroyantfactotum.tool.structure.block.StructureBlock;
 import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
-import com.foudroyantfactotum.tool.structure.utility.StructureQuery;
 import com.google.common.base.Preconditions;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHorizontal;
@@ -45,7 +44,7 @@ public class StructureBlockItem extends ItemBlock
     {
         Preconditions.checkNotNull(player);
         final StructureBlock structureBlock = (StructureBlock)block;
-        newState = getInitialStateForSubItems(stack, newState);
+        newState = getInitialStateForSubItem(stack, newState);
 
         final EnumFacing orientation = newState.getValue(BlockHorizontal.FACING);
         boolean mirror = false;
@@ -86,7 +85,7 @@ public class StructureBlockItem extends ItemBlock
         return true;
     }
 
-    protected IBlockState getInitialStateForSubItems(ItemStack stack, IBlockState newState)
+    public IBlockState getInitialStateForSubItem(ItemStack stack, IBlockState newState)
     {
         return newState;
     }

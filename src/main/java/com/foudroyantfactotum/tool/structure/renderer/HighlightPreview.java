@@ -1,6 +1,7 @@
 package com.foudroyantfactotum.tool.structure.renderer;
 
 import com.foudroyantfactotum.tool.structure.block.StructureBlock;
+import com.foudroyantfactotum.tool.structure.item.StructureBlockItem;
 import com.foudroyantfactotum.tool.structure.utility.StructureQuery;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
@@ -88,6 +89,11 @@ public class HighlightPreview {
             List<BlockPos.MutableBlockPos> badLocations = Lists.newArrayList();
 
             IBlockState blockState = structureBlock.getStateForPlacement(world, potentialPlaceLocation, target.sideHit, (float)target.hitVec.x, (float)target.hitVec.y, (float)target.hitVec.z, heldItem.getMetadata(), player, EnumHand.MAIN_HAND);
+            final Item item = heldItem.getItem();
+            if (item instanceof StructureBlockItem) {
+                blockState = ((StructureBlockItem)item).getInitialStateForSubItem(heldItem, blockState);
+            }
+
             final EnumFacing orientation = blockState.getValue(BlockHorizontal.FACING);
             boolean mirror = false;
             if (structureBlock.canMirror()) {
