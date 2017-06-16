@@ -174,6 +174,15 @@ public final class StructureDefinitionBuilder
     private IBlockState[][][] conBlocks;
 
     /**
+     * Define what each character represents within the block map using IBlockStates
+     * @param representation char to unlocal.getZ()ed block name map
+     * @exception NullPointerException thrown if block doesn't exist.
+     */
+    public void assignConstructionDefWithStates(ImmutableMap<Character, IBlockState> representation){
+        this.conDef = representation;
+    }
+
+    /**
      * Define what each character represents within the block map
      * @param representation char to unlocal.getZ()ed block name map
      * @exception NullPointerException thrown if block doesn't exist.
