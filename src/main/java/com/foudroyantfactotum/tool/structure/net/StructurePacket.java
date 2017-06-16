@@ -21,6 +21,7 @@ import com.foudroyantfactotum.tool.structure.utility.IStructureDefinitionProvide
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
@@ -92,7 +93,7 @@ public class StructurePacket implements IMessage
         @Override
         public IMessage onMessage(StructurePacket msg, MessageContext ctx)
         {
-            final World world = ctx.getServerHandler().player.world;
+            final World world = Minecraft.getMinecraft().world;
             final IStructureDefinitionProvider structureDefinition = Structure.getStructureDefinitionByRegistryName(msg.structureRegistryName);
             final StructureBlock block = structureDefinition.getStructureDefinition().getMasterBlock();
 
