@@ -15,9 +15,9 @@
  */
 package com.foudroyantfactotum.tool.structure.utility;
 
+import com.foudroyantfactotum.tool.structure.IStructure.IPartBlockState;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.foudroyantfactotum.tool.structure.IStructure.IPartBlockState;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 

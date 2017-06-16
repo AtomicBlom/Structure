@@ -15,13 +15,13 @@
  */
 package com.foudroyantfactotum.tool.structure.registry;
 
-import com.google.common.base.Objects;
 import com.foudroyantfactotum.tool.structure.IStructure.IPartBlockState;
 import com.foudroyantfactotum.tool.structure.coordinates.BlockPosUtil;
 import com.foudroyantfactotum.tool.structure.coordinates.StructureIterable;
+import com.google.common.base.Objects;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
-import net.minecraft.util.EnumFacing;
 
 import java.util.Arrays;
 import java.util.BitSet;
