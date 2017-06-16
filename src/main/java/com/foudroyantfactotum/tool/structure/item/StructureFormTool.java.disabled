@@ -16,7 +16,6 @@
 package com.foudroyantfactotum.tool.structure.item;
 
 import com.foudroyantfactotum.tool.structure.IStructure.IPartBlockState;
-import com.foudroyantfactotum.tool.structure.StructureRegistry;
 import com.foudroyantfactotum.tool.structure.block.StructureBlock;
 import com.foudroyantfactotum.tool.structure.net.StructureNetwork;
 import com.foudroyantfactotum.tool.structure.net.StructurePacket;
@@ -118,7 +117,7 @@ public class StructureFormTool extends Item
             world.setBlockState(result.origin, state, 0x2);
             result.block.formStructure(world, result.origin, state, 0x2);
 
-            updateExternalNeighbours(world, result.origin, result.block.getPattern(), result.orientation, result.mirror, true);
+            updateExternalNeighbours(world, result.origin, result.block.getStructureDefinitionProvider(), result.orientation, result.mirror, true);
 
             StructureNetwork.network.sendToAllAround(
                     new StructurePacket(result.origin, result.block.getRegHash(), result.orientation, result.mirror, StructurePacketOption.BUILD),
@@ -151,7 +150,7 @@ public class StructureFormTool extends Item
         @Override
         public SearchResult call() throws Exception
         {
-            final StructureDefinition sd = ssBlock.getPattern();
+            final StructureDefinition sd = ssBlock.getStructureDefinitionProvider();
             final BlockPos tl = sd.getToolFormLocation();
 
             nextOrientation:

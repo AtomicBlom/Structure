@@ -5,8 +5,9 @@ import net.minecraft.client.renderer.VertexBuffer;
 /**
  * Created by codew on 20/12/2016.
  */
-class ReusableVertexBuffer extends VertexBuffer {
-    public ReusableVertexBuffer(int bufferSizeIn) {
+class ReusableBufferBuilder extends VertexBuffer
+{
+    public ReusableBufferBuilder(int bufferSizeIn) {
         super(bufferSizeIn);
     }
 

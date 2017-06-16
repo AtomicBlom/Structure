@@ -24,9 +24,9 @@ public final class StructureNetwork
 {
     public static SimpleNetworkWrapper network;
 
-    public static void init(@Nonnull final SimpleNetworkWrapper network)
+    public static void init(@Nonnull final SimpleNetworkWrapper network, int channelNumber)
     {
-        network.registerMessage(StructurePacket.Handler.class, StructurePacket.class, 1, Side.CLIENT);
+        network.registerMessage(StructurePacket.Handler.class, StructurePacket.class, channelNumber, Side.CLIENT);
 
         StructureNetwork.network = network;
     }

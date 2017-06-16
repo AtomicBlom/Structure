@@ -15,9 +15,9 @@
  */
 package com.foudroyantfactotum.tool.structure.IStructure.structure;
 
-import com.foudroyantfactotum.tool.structure.registry.StructureDefinition;
+import com.foudroyantfactotum.tool.structure.utility.IStructureDefinitionProvider;
 
 public interface IPatternHolder
 {
-    StructureDefinition getPattern();
+    IStructureDefinitionProvider getStructureDefinitionProvider();
 }

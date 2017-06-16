@@ -1,6 +1,7 @@
 package com.foudroyantfactotum.tool.structure.renderer;
 
 import com.foudroyantfactotum.tool.structure.block.StructureBlock;
+import com.foudroyantfactotum.tool.structure.item.StructureBlockItem;
 import com.foudroyantfactotum.tool.structure.utility.StructureQuery;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
@@ -88,6 +89,11 @@ public class HighlightPreview {
             List<BlockPos.MutableBlockPos> badLocations = Lists.newArrayList();
 
             IBlockState blockState = structureBlock.getStateForPlacement(world, potentialPlaceLocation, target.sideHit, (float)target.hitVec.xCoord, (float)target.hitVec.yCoord, (float)target.hitVec.zCoord, heldItem.getMetadata(), player, EnumHand.MAIN_HAND);
+            final Item item = heldItem.getItem();
+            if (item instanceof StructureBlockItem) {
+                blockState = ((StructureBlockItem)item).getInitialStateForSubItem(heldItem, blockState);
+            }
+
             final EnumFacing orientation = blockState.getValue(BlockHorizontal.FACING);
             boolean mirror = false;
             if (structureBlock.canMirror()) {
@@ -147,10 +153,10 @@ public class HighlightPreview {
         Minecraft.getMinecraft().renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
-        VertexBuffer vertexBuffer = new ReusableVertexBuffer(2097152);
-        renderModelToVertexBuffer(vertexBuffer, state, model, canPlace);
+        VertexBuffer vertexBuffer = new ReusableBufferBuilder(2097152);
+        renderModelToBufferBuilder(vertexBuffer, state, model, canPlace);
 
-        WorldVertexBufferUploader worldVertexBufferUploader = new WorldVertexBufferUploader();
+        WorldVertexBufferUploader worldBufferBuilderUploader = new WorldVertexBufferUploader();
 
         GlStateManager.enableCull();
         GlStateManager.enableBlend();
@@ -161,11 +167,11 @@ public class HighlightPreview {
         GlStateManager.depthFunc(GL11.GL_LEQUAL);
         GlStateManager.colorMask(false, false, false, false);
 
-        worldVertexBufferUploader.draw(vertexBuffer);
+        worldBufferBuilderUploader.draw(vertexBuffer);
 
         GlStateManager.depthFunc(GL11.GL_EQUAL);
         GlStateManager.colorMask(true, true, true, true);
-        worldVertexBufferUploader.draw(vertexBuffer);
+        worldBufferBuilderUploader.draw(vertexBuffer);
 
         GlStateManager.disableCull();
         GlStateManager.depthFunc(GL11.GL_LEQUAL);
@@ -173,7 +179,7 @@ public class HighlightPreview {
         GlStateManager.disableAlpha();
     }
 
-    private static void renderModelToVertexBuffer(VertexBuffer vertexBuffer, IBlockState state, IBakedModel model, boolean canPlace) {
+    private static void renderModelToBufferBuilder(VertexBuffer vertexBuffer, IBlockState state, IBakedModel model, boolean canPlace) {
         vertexBuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
 
         int color = (0x80000000 | (canPlace ? 0xFFFFFF : 0xFF5555));
