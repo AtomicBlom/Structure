@@ -135,9 +135,11 @@ public class StructureShapeBlock extends Block implements ITileEntityProvider, I
 
         if (te != null)
         {
-            if (te.getStructureDefinitionProvider().getStructureDefinition().getMasterBlock() != null)
+            final StructureDefinition structureDefinition = te.getStructureDefinitionProvider().getStructureDefinition();
+            if (structureDefinition.getMasterBlock() != null)
             {
-                return te.getStructureDefinitionProvider().getStructureDefinition().getMasterBlock().getPickBlock(state, target, world, pos, player);
+                final BlockPos masterBlockLocation = te.getMasterBlockLocation();
+                return structureDefinition.getMasterBlock().getPickBlock(world.getBlockState(masterBlockLocation), target, world, masterBlockLocation, player);
             }
         }
 

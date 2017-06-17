@@ -43,14 +43,17 @@ minecraft {
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
-idea {
+/*idea {
     project {
         outputFile = new File(outputFile.parentFile, rootProject.name + "-" + config.minecraft_version + ".ipr")
     }
     module {
         name = rootProject.name + "-" + config.minecraft_version
     }
-}
+}*/
+
+sourceSets.remove(sourceSets.api)
+//sourceSets.remove(sourceSets.test)
 
 jar {
     classifier = 'universal'
