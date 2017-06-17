@@ -35,7 +35,7 @@ public class Structure
         TransformLAG.initStatic();
         StructureNetwork.init(networkChannel, channelNumber);
 
-        MinecraftForge.EVENT_BUS.register(new Structure());
+        //MinecraftForge.EVENT_BUS.register(new Structure());
 
         structureRegistry = new RegistryBuilder<IStructureDefinitionProvider>()
                 .setName(new ResourceLocation(modId, "StructureDefinitionRegistry"))
