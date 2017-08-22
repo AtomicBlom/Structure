@@ -65,23 +65,18 @@ import java.util.stream.Collectors;
  */
 public class StructureDefinition
 {
-    private BitSet sbLayout;
-    private BlockPos sbLayoutSize;
-    private BlockPos sbLayoutSizeHlf;
+    private final BitSet sbLayout;
+    private final BlockPos sbLayoutSize;
+    private final BlockPos sbLayoutSizeHlf;
 
-    private BlockPos masterPosition;
-    private BlockPos toolFormPosition;
+    private final BlockPos masterPosition;
+    private final BlockPos toolFormPosition;
 
-    private IPartBlockState[][][] blocks;
-    private List<CollisionBoxRule> collisionBoxes;
-    private StructureShapeBlock shapeBlock;
-    private StructureBlock masterBlock;
-    private List<CollisionBoxRule> selectionBoxRules;
-
-    private StructureDefinition()
-    {
-        //noop
-    }
+    private final IPartBlockState[][][] blocks;
+    private final List<CollisionBoxRule> collisionBoxes;
+    private final StructureShapeBlock shapeBlock;
+    private final StructureBlock masterBlock;
+    private final List<CollisionBoxRule> selectionBoxRules;
 
     public StructureDefinition(BitSet sbLayout,
                                BlockPos sbLayoutSize,
@@ -206,5 +201,11 @@ public class StructureDefinition
                 .add("sbLayoutSize", sbLayoutSize)
                 .add("sbLayout", sbLayout)
                 .toString();
+    }
+
+    public StructureTransformation getTransformsFor(EnumFacing facing, boolean mirrored)
+    {
+        return new StructureTransformation(this, facing, mirrored);
+
     }
 }

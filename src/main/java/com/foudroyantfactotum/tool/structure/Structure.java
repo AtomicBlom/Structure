@@ -11,8 +11,8 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.common.registry.IForgeRegistry;
-import net.minecraftforge.fml.common.registry.RegistryBuilder;
+import net.minecraftforge.registries.*;
+import javax.annotation.Nullable;
 import java.util.Map;
 
 
@@ -41,7 +41,7 @@ public class Structure
                 .setName(new ResourceLocation(modId, "StructureDefinitionRegistry"))
                 .setType(IStructureDefinitionProvider.class)
                 .setIDRange(0, Short.MAX_VALUE)
-                .add((obj, id, slaveset) -> obj.rebuildStructure())
+                .add((owner, stage, id, obj, oldObj) -> obj.rebuildStructure())
                 .create();
     }
 

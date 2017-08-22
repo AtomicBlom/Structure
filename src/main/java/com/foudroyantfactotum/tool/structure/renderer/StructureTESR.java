@@ -29,7 +29,7 @@ import org.lwjgl.opengl.GL11;
 public class StructureTESR<E extends StructureTE> extends TileEntitySpecialRenderer<E>
 {
     @Override
-    public void renderTileEntityAt(E te, double x, double y, double z, float partialTicks, int destroyStage, float unknown)
+    public void render(E te, double x, double y, double z, float partialTicks, int destroyStage, float unknown)
     {
         final BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
         final Tessellator tessellator = Tessellator.getInstance();

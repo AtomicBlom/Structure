@@ -127,7 +127,7 @@ public class HighlightPreview {
 
             renderPlacement(blockState, model, canPlace);
         } else if (renderType == EnumBlockRenderType.ENTITYBLOCK_ANIMATED) {
-            TileEntityRendererDispatcher.instance.renderTileEntityAt(structureBlock.createTileEntity(world, blockState), 0, 0, 0, partialTicks);
+            TileEntityRendererDispatcher.instance.render(structureBlock.createTileEntity(world, blockState), 0, 0, 0, partialTicks);
         }
 
         GlStateManager.popMatrix();
