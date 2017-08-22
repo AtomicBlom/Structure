@@ -19,12 +19,13 @@ import com.foudroyantfactotum.tool.structure.utility.IStructureDefinitionProvide
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 
 import static com.foudroyantfactotum.tool.structure.block.StructureBlock.getMirror;
 import static com.foudroyantfactotum.tool.structure.coordinates.TransformLAG.localToGlobal;
 
-public interface IStructureTE extends ITileEntity
+public interface IStructureTE
 {
     default IBlockState getTransmutedBlock()
     {
@@ -32,7 +33,9 @@ public interface IStructureTE extends ITileEntity
 
         if (sb != null)
         {
-            final IBlockState state = getWorld().getBlockState(getPos());
+            TileEntity thisAsTe = (TileEntity)this;
+
+            final IBlockState state = thisAsTe.getWorld().getBlockState(thisAsTe.getPos());
 
             if (state != null && state.getBlock() instanceof IStructureTE)
             {
